@@ -1,0 +1,20 @@
+FROM golang:1.23-bullseye
+
+ENV TZ="Asia/Tokyo"
+
+# ソースコードをコンテナにコピー
+ADD ./ /go/src/app
+WORKDIR /go/src/app
+
+# Go モジュールのキャッシュを有効化してダウンロード
+# RUN --mount=type=cache,target=/go/pkg/mod/ \
+#     go mod download
+
+# 必要なツールをインストール
+RUN go install github.com/go-delve/delve/cmd/dlv@latest && \
+    go install github.com/air-verse/air@latest && \
+    go install github.com/pressly/goose/v3/cmd/goose@latest && \
+    go install github.com/99designs/gqlgen@latest
+
+# PATH を環境変数に追加（必要な場合）
+ENV PATH="/go/bin:$PATH"
