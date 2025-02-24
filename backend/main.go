@@ -47,7 +47,7 @@ func (s *TaskServiceServer) GetTasks(ctx context.Context, in *emptypb.Empty) (*p
 	for _, task := range tasks {
 		pbTasks = append(pbTasks, &pb.Task{
 			Id:        task.ID,
-			Title:     task.Title + "aaaa",
+			Title:     task.Title,
 			Note:      task.Note,
 			Completed: task.Completed,
 			CreatedAt: timestamppb.New(task.CreatedAt),

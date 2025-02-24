@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE tasks (
-   id INTEGER AUTO_INCREMENT PRIMARY KEY,
+   id varchar(255) NOT NULL,
    title varchar(255) DEFAULT NULL,
    note text DEFAULT NULL,
    completed integer DEFAULT 0,
