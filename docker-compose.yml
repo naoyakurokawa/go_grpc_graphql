@@ -1,14 +1,14 @@
 version: '3.9'
 services:
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   command: yarn run dev
-  #   ports:
-  #     - 3000:3000
-  #   volumes:
-  #     - ./frontend:/app
-  #   tty: true
+  frontend:
+    build:
+      context: ./frontend
+    command: yarn run dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+    tty: true
   bff:
     build:
       context: .
