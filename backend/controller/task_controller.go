@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"backend/domain/model"
 	"backend/usecase"
@@ -58,12 +56,7 @@ func (h *TaskHandler) CreateTask(ctx context.Context, in *pb.CreateTaskRequest) 
 
 // UpdateTask handles updates to a task.
 func (h *TaskHandler) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) (*pb.Task, error) {
-	input := in.GetInput()
-	if input == nil {
-		return nil, fmt.Errorf("input is required")
-	}
-	id := strconv.FormatUint(input.GetId(), 10)
-	task, err := h.usecase.UpdateTask(ctx, id, input.GetTitle(), input.GetNote(), input.GetCompleted())
+	task, err := h.usecase.UpdateTask(ctx, toUpdateTaskRequest(in))
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +66,7 @@ func (h *TaskHandler) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) 
 
 // DeleteTask handles deleting a task.
 func (h *TaskHandler) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.DeleteTaskResponse, error) {
-	id := strconv.FormatUint(in.GetId(), 10)
-	if err := h.usecase.DeleteTask(ctx, id); err != nil {
+	if err := h.usecase.DeleteTask(ctx, in.Id); err != nil {
 		return &pb.DeleteTaskResponse{Success: false}, err
 	}
 
@@ -98,4 +90,20 @@ func toPBTask(task model.Task) (*pb.Task, error) {
 		CreatedAt: timestamppb.New(task.CreatedAt),
 		UpdatedAt: timestamppb.New(task.UpdatedAt),
 	}, nil
+}
+
+func toUpdateTaskRequest(in *pb.UpdateTaskRequest) model.UpdateTaskRequest {
+	req := model.UpdateTaskRequest{
+		ID: in.Input.Id,
+	}
+	if in.Input.Title != "" {
+		req.Title = &in.Input.Title
+	}
+	if in.Input.Note != "" {
+		req.Note = &in.Input.Note
+	}
+	if in.Input.Completed != 0 {
+		req.Completed = &in.Input.Completed
+	}
+	return req
 }

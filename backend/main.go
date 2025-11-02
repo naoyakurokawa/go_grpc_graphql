@@ -5,9 +5,7 @@ import (
 	"net"
 
 	infrastructure "backend/Infrastructure"
-	"backend/Infrastructure/store"
 	"backend/controller"
-	"backend/usecase"
 
 	"google.golang.org/grpc"
 )
@@ -19,17 +17,13 @@ func main() {
 	}
 	defer db.Close()
 
-	taskRepo := store.NewTaskRepository(db)
-	taskUsecase := usecase.NewTaskUseCase(taskRepo)
-	taskHandler := controller.NewTaskHandler(taskUsecase)
-
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	controller.RegisterTaskService(grpcServer, taskHandler)
+	controller.RegisterService(grpcServer, db)
 
 	log.Println("Server is running on port 50051")
 	if err := grpcServer.Serve(listener); err != nil {

@@ -26,36 +26,43 @@ func (r *TaskRepository) FindAll(ctx context.Context) ([]model.Task, error) {
 	if err := r.db.Find(&tasks).Error; err != nil {
 		return nil, err
 	}
+
 	return tasks, nil
 }
 
 // FindByID retrieves a task by its identifier.
-func (r *TaskRepository) FindByID(ctx context.Context, id string) (*model.Task, error) {
+func (r *TaskRepository) FindByID(ctx context.Context, id uint64) (*model.Task, error) {
 	var task model.Task
 	if err := r.db.First(&task, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
+
 	return &task, nil
 }
 
 // Create persists a new task entity.
-func (r *TaskRepository) Create(ctx context.Context, task model.Task) (*model.Task, error) {
-	d := dto.FromModel(task)
+func (r *TaskRepository) Create(ctx context.Context, in model.Task) (*model.Task, error) {
+	d := dto.FromModel(in)
 
 	if err := r.db.Create(&d).Error; err != nil {
 		return nil, err
 	}
-
 	res := d.ToModel()
+
 	return &res, nil
 }
 
 // Update persists updates to an existing task entity.
-func (r *TaskRepository) Update(ctx context.Context, task *model.Task) error {
-	return r.db.Save(task).Error
+func (r *TaskRepository) Update(ctx context.Context, in model.Task) (*model.Task, error) {
+	err := r.db.Save(in).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &in, nil
 }
 
 // Delete removes a task by id.
-func (r *TaskRepository) Delete(ctx context.Context, id string) error {
+func (r *TaskRepository) Delete(ctx context.Context, id uint64) error {
 	return r.db.Delete(&model.Task{}, "id = ?", id).Error
 }

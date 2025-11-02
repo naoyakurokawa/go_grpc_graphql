@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"time"
 
 	"backend/domain/model"
 	"backend/domain/repository"
@@ -12,8 +11,8 @@ import (
 type TaskUseCase interface {
 	ListTasks(ctx context.Context) ([]model.Task, error)
 	CreateTask(ctx context.Context, in model.Task) (*model.Task, error)
-	UpdateTask(ctx context.Context, id, title, note string, completed int32) (*model.Task, error)
-	DeleteTask(ctx context.Context, id string) error
+	UpdateTask(ctx context.Context, in model.UpdateTaskRequest) (*model.Task, error)
+	DeleteTask(ctx context.Context, id uint64) error
 }
 
 type taskUseCase struct {
@@ -36,25 +35,34 @@ func (uc *taskUseCase) CreateTask(ctx context.Context, in model.Task) (*model.Ta
 }
 
 // UpdateTask updates an existing task.
-func (uc *taskUseCase) UpdateTask(ctx context.Context, id, title, note string, completed int32) (*model.Task, error) {
-	task, err := uc.repo.FindByID(ctx, id)
+func (uc *taskUseCase) UpdateTask(ctx context.Context, in model.UpdateTaskRequest) (*model.Task, error) {
+	// 1. 既存データを取得
+	task, err := uc.repo.FindByID(ctx, in.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	task.Title = title
-	task.Note = note
-	task.Completed = completed
-	task.UpdatedAt = time.Now()
+	// 2. nil でない項目のみ更新
+	if in.Title != nil {
+		task.Title = *in.Title
+	}
+	if in.Note != nil {
+		task.Note = *in.Note
+	}
+	if in.Completed != nil {
+		task.Completed = *in.Completed
+	}
 
-	if err := uc.repo.Update(ctx, task); err != nil {
+	// 3. リポジトリ層に保存
+	res, err := uc.repo.Update(ctx, *task)
+	if err != nil {
 		return nil, err
 	}
 
-	return task, nil
+	return res, nil
 }
 
 // DeleteTask removes a task by id.
-func (uc *taskUseCase) DeleteTask(ctx context.Context, id string) error {
+func (uc *taskUseCase) DeleteTask(ctx context.Context, id uint64) error {
 	return uc.repo.Delete(ctx, id)
 }
