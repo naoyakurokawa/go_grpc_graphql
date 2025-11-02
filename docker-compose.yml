@@ -8,6 +8,7 @@ services:
       - 3000:3000
     volumes:
       - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
     tty: true
   bff:
     build:
@@ -54,4 +55,6 @@ services:
       - ./backend/docker/db/entrypoint:/docker-entrypoint-initdb.d
 volumes:
   db-data:
+    driver: local
+  frontend-node-modules:
     driver: local

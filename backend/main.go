@@ -118,7 +118,7 @@ func (s *TaskServiceServer) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.
 func main() {
 	connectionString := fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		"root", "password", "db", 3306, "go_grpc_graphql",
+		"root", "password", "db", 3306, "test",
 	)
 
 	db, err := gorm.Open("mysql", connectionString) // 修正
