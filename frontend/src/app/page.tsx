@@ -1,6 +1,8 @@
+import type { JSX } from "react";
+
 import { getTasks } from "../lib/getTodos";
 
-export default async function Home() {
+export default async function Home(): Promise<JSX.Element> {
   const tasks = await getTasks();
 
   return (
