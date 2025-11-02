@@ -1,4 +1,4 @@
-.PHONY: goose-up goose-status
+.PHONY: goose-up goose-status gqlgen
 
 # Run goose migrations inside the bff container
 GOOSE_SERVICE := bff
@@ -11,3 +11,7 @@ goose-up:
 
 goose-status:
 	docker compose run --rm $(GOOSE_SERVICE) sh -c '$(GOOSE_CMD) status'
+
+# Run gqlgen code generation for the BFF GraphQL schema
+gqlgen:
+	docker compose run --rm bff sh -c 'gqlgen generate'

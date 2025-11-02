@@ -9,11 +9,17 @@ export default async function Home(): Promise<JSX.Element> {
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">Todo List</h1>
       <ul className="list-disc pl-5">
-        {tasks.map((task: { id: string; title: string, note: string }) => (
-          <li key={task.id} className="mb-2">
-            {task.title}: {task.note}
-          </li>
-        ))}
+        {tasks.map((task, index) => {
+          const key =
+            typeof task.id === "number" && Number.isFinite(task.id)
+              ? `task-${task.id}`
+              : `task-${index}`;
+          return (
+            <li key={key} className="mb-2">
+              {task.title}: {task.note}
+            </li>
+          );
+        })}
       </ul>
     </main>
   );

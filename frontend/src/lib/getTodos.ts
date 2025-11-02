@@ -1,6 +1,19 @@
 import client from "@/client/client";
 import { gql } from "@apollo/client";
 
+type Task = {
+  id: number;
+  title: string;
+  note: string;
+  completed: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type GetTasksQuery = {
+  tasks: Task[];
+};
+
 const GET_TASKS = gql`
   query GetTasks {
     tasks {
@@ -14,7 +27,7 @@ const GET_TASKS = gql`
   }
 `;
 
-export async function getTasks() {
-  const { data } = await client.query({ query: GET_TASKS });
+export async function getTasks(): Promise<Task[]> {
+  const { data } = await client.query<GetTasksQuery>({ query: GET_TASKS });
   return data.tasks;
 }

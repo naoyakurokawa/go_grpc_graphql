@@ -14,7 +14,7 @@ type Query struct {
 }
 
 type Task struct {
-	ID        string `json:"id"`
+	ID        uint64 `json:"id"`
 	Title     string `json:"title"`
 	Note      string `json:"note"`
 	Completed int32  `json:"completed"`
@@ -23,7 +23,7 @@ type Task struct {
 }
 
 type UpdateTask struct {
-	ID        string  `json:"id"`
+	ID        uint64  `json:"id"`
 	Title     *string `json:"title,omitempty"`
 	Note      *string `json:"note,omitempty"`
 	Completed *int32  `json:"completed,omitempty"`

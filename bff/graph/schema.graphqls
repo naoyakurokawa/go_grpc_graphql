@@ -1,5 +1,7 @@
+scalar Uint64
+
 type Task {
-  id: ID!
+  id: Uint64!
   title: String!
   note: String!
   completed: Int!
@@ -13,7 +15,7 @@ input NewTask {
 }
 
 input UpdateTask {
-  id: ID!
+  id: Uint64!
   title: String
   note: String
   completed: Int
@@ -22,7 +24,7 @@ input UpdateTask {
 type Mutation {
   createTask(input: NewTask!): Task!
   updateTask(input: UpdateTask!): Task!
-  deleteTask(id: ID!): Boolean!
+  deleteTask(id: Uint64!): Boolean!
 }
 
 type Query {
