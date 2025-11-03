@@ -151,11 +151,11 @@ export default function Home() {
             className="border rounded px-3 py-2 flex-1 min-w-[200px]"
             required
           />
-          <input
+          <textarea
             name="note"
-            type="text"
             placeholder="Note"
-            className="border rounded px-3 py-2 flex-1 min-w-[200px]"
+            rows={3}
+            className="border rounded px-3 py-2 flex-1 min-w-[200px] resize-y"
             required
           />
           <button
@@ -200,8 +200,9 @@ export default function Home() {
                   {task.title}
                 </p>
                 <p
-                  className={`text-sm text-gray-600 ${isCompleted ? "line-through" : ""
-                    }`}
+                  className={`text-sm text-gray-600 whitespace-pre-line ${
+                    isCompleted ? "line-through" : ""
+                  }`}
                 >
                   {task.note}
                 </p>
@@ -229,10 +230,11 @@ export default function Home() {
                       </label>
                       <label className="text-sm font-medium">
                         メモ
-                        <input
+                        <textarea
                           name="note"
                           defaultValue={task.note}
-                          className="mt-1 border rounded px-2 py-1 w-full"
+                          rows={3}
+                          className="mt-1 border rounded px-2 py-1 w-full resize-y"
                         />
                       </label>
                       <button
