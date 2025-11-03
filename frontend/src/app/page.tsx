@@ -189,27 +189,21 @@ export default function Home() {
           return (
             <li
               key={task.id}
-              className={`border rounded p-4 shadow-sm flex flex-col gap-3 ${
-                isCompleted ? "bg-gray-200" : ""
-              }`}
+              className={`border rounded p-4 shadow-sm flex flex-col gap-3 ${isCompleted ? "bg-gray-200" : ""
+                }`}
             >
               <div>
                 <p
-                  className={`font-semibold ${
-                    isCompleted ? "line-through text-gray-600" : ""
-                  }`}
+                  className={`font-semibold ${isCompleted ? "line-through text-gray-600" : ""
+                    }`}
                 >
                   {task.title}
                 </p>
                 <p
-                  className={`text-sm text-gray-600 ${
-                    isCompleted ? "line-through" : ""
-                  }`}
+                  className={`text-sm text-gray-600 ${isCompleted ? "line-through" : ""
+                    }`}
                 >
                   {task.note}
-                </p>
-                <p className="text-xs text-gray-500">
-                  完了: {task.completed ? "はい" : "いいえ"}
                 </p>
               </div>
               <div className="flex items-start gap-3">

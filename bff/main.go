@@ -7,17 +7,24 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/naoyakurokawa/go_grpc_graphql/Infrastructure/store"
+	"github.com/naoyakurokawa/go_grpc_graphql/controller"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph/resolver"
 	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
+	"github.com/naoyakurokawa/go_grpc_graphql/usecase"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const grpcAddress = "backend:50051"
 
 func main() {
 	// gRPC クライアントの接続
-	conn, err := grpc.Dial(grpcAddress, grpc.WithInsecure())
+	conn, err := grpc.NewClient(
+		grpcAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatalf("failed to connect to gRPC server: %v", err)
 	}
@@ -25,6 +32,10 @@ func main() {
 
 	// gRPC クライアントを作成
 	grpcClient := pb.NewTaskServiceClient(conn)
+
+	repo := store.NewTodoStore(grpcClient)
+	todoUsecase := usecase.NewTodoUsecase(repo)
+	todoController := controller.NewTodoController(todoUsecase)
 
 	e := echo.New()
 
@@ -47,7 +58,7 @@ func main() {
 
 	graphqlHandler := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
-			graph.Config{Resolvers: &resolver.Resolver{GrpcClient: grpcClient}},
+			graph.Config{Resolvers: &resolver.Resolver{TodoController: todoController}},
 		),
 	)
 	playgroundHandler := playground.Handler("GraphQL", "/query")

@@ -1,5 +1,9 @@
 scalar Uint64
 
+type Query {
+  tasks: [Task!]!
+}
+
 type Task {
   id: Uint64!
   title: String!
@@ -7,6 +11,12 @@ type Task {
   completed: Int!
   created_at: String!
   updated_at: String!
+}
+
+type Mutation {
+  createTask(input: NewTask!): Task!
+  updateTask(input: UpdateTask!): Task!
+  deleteTask(id: Uint64!): Boolean!
 }
 
 input NewTask {
@@ -19,14 +29,4 @@ input UpdateTask {
   title: String
   note: String
   completed: Int
-}
-
-type Mutation {
-  createTask(input: NewTask!): Task!
-  updateTask(input: UpdateTask!): Task!
-  deleteTask(id: Uint64!): Boolean!
-}
-
-type Query {
-  tasks: [Task!]!
 }

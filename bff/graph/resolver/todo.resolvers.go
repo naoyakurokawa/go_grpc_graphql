@@ -6,110 +6,26 @@ package resolver
 
 import (
 	"context"
-	"log"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
-	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateTask is the resolver for the createTask field.
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
-	// gRPCリクエストの作成
-	req := &pb.CreateTaskRequest{
-		Input: &pb.NewTask{
-			Title: input.Title,
-			Note:  input.Note,
-		},
-	}
-
-	// gRPCサーバーにリクエストを送信
-	res, err := r.GrpcClient.CreateTask(ctx, req)
-	if err != nil {
-		log.Printf("failed to create task: %v", err)
-		return nil, err
-	}
-
-	// gRPCのレスポンスをGraphQLのレスポンスに変換
-	return &model.Task{
-		ID:        res.Id,
-		Title:     res.Title,
-		Note:      res.Note,
-		Completed: res.Completed,
-		CreatedAt: res.CreatedAt.AsTime().Format("2006-01-02 15:04:05"),
-		UpdatedAt: res.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"),
-	}, nil
+	return r.TodoController.CreateTask(ctx, input)
 }
 
 // UpdateTask is the resolver for the updateTask field.
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
-	req := &pb.UpdateTaskRequest{
-		Input: &pb.UpdateTask{
-			Id: input.ID,
-		},
-	}
-
-	// Optional fields
-	if input.Title != nil {
-		req.Input.Title = input.Title
-	}
-	if input.Note != nil {
-		req.Input.Note = input.Note
-	}
-	if input.Completed != nil {
-		value := int32(*input.Completed)
-		req.Input.Completed = &value
-	}
-
-	res, err := r.GrpcClient.UpdateTask(ctx, req)
-	if err != nil {
-		log.Printf("failed to update task: %v", err)
-		return nil, err
-	}
-
-	return &model.Task{
-		ID:        res.Id,
-		Title:     res.Title,
-		Note:      res.Note,
-		Completed: res.Completed,
-		CreatedAt: res.CreatedAt.AsTime().Format("2006-01-02 15:04:05"),
-		UpdatedAt: res.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"),
-	}, nil
+	return r.TodoController.UpdateTask(ctx, input)
 }
 
 // DeleteTask is the resolver for the deleteTask field.
 func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, error) {
-	req := &pb.TaskId{Id: id}
-	res, err := r.GrpcClient.DeleteTask(ctx, req)
-	if err != nil {
-		log.Printf("failed to delete task: %v", err)
-		return false, err
-	}
-
-	return res.Success, nil
+	return r.TodoController.DeleteTask(ctx, id)
 }
 
 // Tasks is the resolver for the tasks field.
 func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
-	req := &emptypb.Empty{}
-
-	res, err := r.GrpcClient.GetTasks(ctx, req)
-	if err != nil {
-		log.Printf("failed to fetch tasks: %v", err)
-		return nil, err
-	}
-
-	var tasks []*model.Task
-	for _, task := range res.Tasks {
-		tasks = append(tasks, &model.Task{
-			ID:        task.Id,
-			Title:     task.Title,
-			Note:      task.Note,
-			Completed: task.Completed,
-			CreatedAt: task.CreatedAt.AsTime().Format("2006-01-02 15:04:05"),
-			UpdatedAt: task.UpdatedAt.AsTime().Format("2006-01-02 15:04:05"),
-		})
-	}
-
-	return tasks, nil
+	return r.TodoController.ListTasks(ctx)
 }

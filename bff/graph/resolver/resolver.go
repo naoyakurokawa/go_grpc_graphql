@@ -1,8 +1,8 @@
 package resolver
 
 import (
+	"github.com/naoyakurokawa/go_grpc_graphql/controller"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
-	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 )
 
 // This file will not be regenerated automatically.
@@ -10,7 +10,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	GrpcClient pb.TaskServiceClient // gRPC クライアントを追加
+	TodoController *controller.TodoController
 }
 
 // Mutation returns MutationResolver implementation.

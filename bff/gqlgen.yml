@@ -42,8 +42,8 @@ resolver:
   # filename: graph/resolver.go
 
   # Only for follow-schema layout:
-  # dir: graph/resolver
-  # filename_template: "{name}.resolvers.go"
+  dir: graph/resolver
+  filename_template: "{name}.resolvers.go"
 
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
