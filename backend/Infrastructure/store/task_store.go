@@ -54,12 +54,15 @@ func (r *TaskRepository) Create(ctx context.Context, in model.Task) (*model.Task
 
 // Update persists updates to an existing task entity.
 func (r *TaskRepository) Update(ctx context.Context, in model.Task) (*model.Task, error) {
-	err := r.db.Save(in).Error
+	d := dto.FromModel(in)
+
+	err := r.db.Save(&d).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return &in, nil
+	res := d.ToModel()
+	return &res, nil
 }
 
 // Delete removes a task by id.

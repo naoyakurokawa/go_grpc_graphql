@@ -35,8 +35,11 @@ func (t Task) ToModel() model.Task {
 // FromModel converts the domain Task entity into the DTO form.
 func FromModel(task model.Task) Task {
 	return Task{
+		ID:        task.ID,
 		Title:     task.Title,
 		Note:      task.Note,
 		Completed: int(task.Completed),
+		CreatedAt: task.CreatedAt,
+		UpdatedAt: task.UpdatedAt,
 	}
 }
