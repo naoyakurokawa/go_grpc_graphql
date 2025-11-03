@@ -30,11 +30,11 @@ func (h *TaskHandler) GetTasks(ctx context.Context, _ *emptypb.Empty) (*pb.TaskL
 	if err != nil {
 		return nil, err
 	}
-
 	pbTasks := make([]*pb.Task, 0, len(tasks))
 	for _, task := range tasks {
 		converted, err := toPBTask(task)
 		if err != nil {
+			log.Errorf("failed to convert task to pb.Task: %v", err)
 			return nil, err
 		}
 		pbTasks = append(pbTasks, converted)

@@ -30,6 +30,19 @@ func main() {
 	e.Debug = true
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"http://127.0.0.1:3000",
+		},
+		AllowMethods: []string{echo.GET, echo.POST, echo.OPTIONS},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+		},
+	}))
 
 	graphqlHandler := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
