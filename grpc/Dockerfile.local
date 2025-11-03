@@ -1,0 +1,29 @@
+FROM golang:1.24.6-bullseye
+
+ENV TZ="Asia/Tokyo"
+
+# 必要なツールをインストール
+RUN apt-get update && apt-get install -y \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# CPU アーキテクチャを判別して、適切な `protoc` をインストール
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then \
+        curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-aarch_64.zip; \
+    else \
+        curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-linux-x86_64.zip; \
+    fi && \
+    unzip protoc-21.12-linux-*.zip -d /usr/local && \
+    rm protoc-21.12-linux-*.zip
+
+# Go 用の protoc プラグインをインストール
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# PATH を環境変数に追加
+ENV PATH="/go/bin:/usr/local/bin:$PATH"
+
+# ソースコードをコンテナにコピー
+ADD ./ /go/src/app
+WORKDIR /go/src/app

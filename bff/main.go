@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
-	pb "github.com/naoyakurokawa/go_grpc_graphql_proto/pb"
+	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 	"google.golang.org/grpc"
 )
 

@@ -1,7 +1,7 @@
 package graph
 
 import (
-	pb "github.com/naoyakurokawa/go_grpc_graphql_proto/pb"
+	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 )
 
 // This file will not be regenerated automatically.

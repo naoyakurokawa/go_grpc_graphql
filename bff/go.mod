@@ -5,7 +5,6 @@ go 1.24.6
 require (
 	github.com/99designs/gqlgen v0.17.81
 	github.com/labstack/echo v3.3.10+incompatible
-	github.com/naoyakurokawa/go_grpc_graphql_proto v0.0.0-20251102123559-f1d58614ba31
 	github.com/vektah/gqlparser/v2 v2.5.31
 	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10

@@ -53,6 +53,15 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./backend/docker/db/entrypoint:/docker-entrypoint-initdb.d
+  grpc:
+    build:
+      context: .
+      dockerfile: ./grpc/Dockerfile.local
+    ports:
+      - 8082:8082
+    volumes:
+      - ./:/go/src/app
+    tty: true
 volumes:
   db-data:
     driver: local

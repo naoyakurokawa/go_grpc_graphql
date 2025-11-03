@@ -4,8 +4,9 @@ import (
 	"backend/Infrastructure/store"
 	"backend/usecase"
 
+	pb "backend/pkg/pb"
+
 	"github.com/jinzhu/gorm"
-	pb "github.com/naoyakurokawa/go_grpc_graphql_proto/pb"
 	"google.golang.org/grpc"
 )
 

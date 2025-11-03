@@ -6,8 +6,9 @@ import (
 	"backend/domain/model"
 	"backend/usecase"
 
+	pb "backend/pkg/pb"
+
 	"github.com/labstack/gommon/log"
-	pb "github.com/naoyakurokawa/go_grpc_graphql_proto/pb"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -96,14 +97,14 @@ func toUpdateTaskRequest(in *pb.UpdateTaskRequest) model.UpdateTaskRequest {
 	req := model.UpdateTaskRequest{
 		ID: in.Input.Id,
 	}
-	if in.Input.Title != "" {
-		req.Title = &in.Input.Title
+	if in.Input.Title != nil {
+		req.Title = in.Input.Title
 	}
-	if in.Input.Note != "" {
-		req.Note = &in.Input.Note
+	if in.Input.Note != nil {
+		req.Note = in.Input.Note
 	}
-	if in.Input.Completed != 0 {
-		req.Completed = &in.Input.Completed
+	if in.Input.Completed != nil {
+		req.Completed = in.Input.Completed
 	}
 	return req
 }
