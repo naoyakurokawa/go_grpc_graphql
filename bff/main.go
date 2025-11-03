@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
+	"github.com/naoyakurokawa/go_grpc_graphql/graph/resolver"
 	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 	"google.golang.org/grpc"
 )
@@ -46,7 +47,7 @@ func main() {
 
 	graphqlHandler := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
-			graph.Config{Resolvers: &graph.Resolver{GrpcClient: grpcClient}},
+			graph.Config{Resolvers: &resolver.Resolver{GrpcClient: grpcClient}},
 		),
 	)
 	playgroundHandler := playground.Handler("GraphQL", "/query")

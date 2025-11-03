@@ -1,0 +1,23 @@
+package resolver
+
+import (
+	"github.com/naoyakurokawa/go_grpc_graphql/graph"
+	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
+)
+
+// This file will not be regenerated automatically.
+//
+// It serves as dependency injection for your app, add any dependencies you require here.
+
+type Resolver struct {
+	GrpcClient pb.TaskServiceClient // gRPC クライアントを追加
+}
+
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
+
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

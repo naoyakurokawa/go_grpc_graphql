@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/naoyakurokawa/go_grpc_graphql/graph/model"
+	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -279,7 +279,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "schema.graphqls"
+//go:embed "schema/todo.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -291,7 +291,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
-	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
+	{Name: "schema/todo.graphqls", Input: sourceData("schema/todo.graphqls"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -302,7 +302,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createTask_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐNewTask)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐNewTask)
 	if err != nil {
 		return nil, err
 	}
@@ -324,7 +324,7 @@ func (ec *executionContext) field_Mutation_deleteTask_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateTask_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐUpdateTask)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐUpdateTask)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +406,7 @@ func (ec *executionContext) _Mutation_createTask(ctx context.Context, field grap
 			return ec.resolvers.Mutation().CreateTask(ctx, fc.Args["input"].(model.NewTask))
 		},
 		nil,
-		ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTask,
+		ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTask,
 		true,
 		true,
 	)
@@ -461,7 +461,7 @@ func (ec *executionContext) _Mutation_updateTask(ctx context.Context, field grap
 			return ec.resolvers.Mutation().UpdateTask(ctx, fc.Args["input"].(model.UpdateTask))
 		},
 		nil,
-		ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTask,
+		ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTask,
 		true,
 		true,
 	)
@@ -556,7 +556,7 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 			return ec.resolvers.Query().Tasks(ctx)
 		},
 		nil,
-		ec.marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTaskᚄ,
+		ec.marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTaskᚄ,
 		true,
 		true,
 	)
@@ -2973,7 +2973,7 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐNewTask(ctx context.Context, v any) (model.NewTask, error) {
+func (ec *executionContext) unmarshalNNewTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐNewTask(ctx context.Context, v any) (model.NewTask, error) {
 	res, err := ec.unmarshalInputNewTask(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -2994,11 +2994,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v model.Task) graphql.Marshaler {
+func (ec *executionContext) marshalNTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v model.Task) graphql.Marshaler {
 	return ec._Task(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTaskᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Task) graphql.Marshaler {
+func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTaskᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Task) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3022,7 +3022,7 @@ func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTask(ctx, sel, v[i])
+			ret[i] = ec.marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTask(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3042,7 +3042,7 @@ func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo
 	return ret
 }
 
-func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v *model.Task) graphql.Marshaler {
+func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v *model.Task) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3068,7 +3068,7 @@ func (ec *executionContext) marshalNUint642uint64(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋgraphᚋmodelᚐUpdateTask(ctx context.Context, v any) (model.UpdateTask, error) {
+func (ec *executionContext) unmarshalNUpdateTask2githubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐUpdateTask(ctx context.Context, v any) (model.UpdateTask, error) {
 	res, err := ec.unmarshalInputUpdateTask(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

@@ -1,4 +1,4 @@
-package graph
+package resolver
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -8,8 +8,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/naoyakurokawa/go_grpc_graphql/graph/model"
-	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
+	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
+	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -113,12 +113,3 @@ func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
 
 	return tasks, nil
 }
-
-// Mutation returns MutationResolver implementation.
-func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
-
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
