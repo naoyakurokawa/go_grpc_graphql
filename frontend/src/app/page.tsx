@@ -22,14 +22,20 @@ type GetCategoriesResponse = {
 
 export default function Home() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [dueDateStartFilter, setDueDateStartFilter] = useState<string>("");
+  const [dueDateEndFilter, setDueDateEndFilter] = useState<string>("");
 
   const categoryFilterValue = selectedCategoryId
     ? Number(selectedCategoryId)
     : null;
 
   const taskVariables = useMemo(
-    () => ({ categoryId: categoryFilterValue }),
-    [categoryFilterValue],
+    () => ({
+      categoryId: categoryFilterValue,
+      dueDateStart: dueDateStartFilter || null,
+      dueDateEnd: dueDateEndFilter || null,
+    }),
+    [categoryFilterValue, dueDateStartFilter, dueDateEndFilter],
   );
 
   const { data, loading, error } = useQuery<GetTasksResponse>(GET_TASKS, {
@@ -86,6 +92,7 @@ export default function Home() {
     const title = (formData.get("title") as string | null)?.trim();
     const note = (formData.get("note") as string | null)?.trim();
     const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
+    const dueDateRaw = (formData.get("due_date") as string | null)?.trim();
 
     if (!title || !note || !categoryIdRaw) {
       return;
@@ -96,8 +103,19 @@ export default function Home() {
       return;
     }
 
+    const input: {
+      title: string;
+      note: string;
+      category_id: number;
+      due_date?: string;
+    } = { title, note, category_id: categoryId };
+
+    if (dueDateRaw) {
+      input.due_date = dueDateRaw;
+    }
+
     await createTaskMutation({
-      variables: { input: { title, note, category_id: categoryId } },
+      variables: { input },
     });
 
     form.reset();
@@ -126,6 +144,7 @@ export default function Home() {
       title?: string;
       note?: string;
       category_id?: number;
+      due_date?: string;
     } = { id };
 
     if (title) {
@@ -144,10 +163,16 @@ export default function Home() {
       }
     }
 
+    const dueDateRaw = (formData.get("due_date") as string | null)?.trim();
+    if (dueDateRaw) {
+      input.due_date = dueDateRaw;
+    }
+
     if (
       input.title === undefined &&
       input.note === undefined &&
-      input.category_id === undefined
+      input.category_id === undefined &&
+      input.due_date === undefined
     ) {
       return;
     }
@@ -216,6 +241,26 @@ export default function Home() {
             ))}
           </select>
         </label>
+        <div className="flex flex-wrap gap-4">
+          <label className="text-sm font-medium">
+            期限開始
+            <input
+              type="date"
+              value={dueDateStartFilter}
+              onChange={(event) => setDueDateStartFilter(event.target.value)}
+              className="mt-1 border rounded px-3 py-2"
+            />
+          </label>
+          <label className="text-sm font-medium">
+            期限終了
+            <input
+              type="date"
+              value={dueDateEndFilter}
+              onChange={(event) => setDueDateEndFilter(event.target.value)}
+              className="mt-1 border rounded px-3 py-2"
+            />
+          </label>
+        </div>
         {categoriesError && (
           <p className="text-xs text-red-600">
             カテゴリの取得に失敗しました: {categoriesError.message}
@@ -238,6 +283,11 @@ export default function Home() {
             rows={3}
             className="border rounded px-3 py-2 flex-1 min-w-[200px] resize-y"
             required
+          />
+          <input
+            type="date"
+            name="due_date"
+            className="border rounded px-3 py-2 flex-1 min-w-[200px]"
           />
           <select
             name="category_id"
@@ -310,6 +360,9 @@ export default function Home() {
                 <p className="text-xs text-gray-500">
                   カテゴリ: {categoryName ?? "未選択"}
                 </p>
+                <p className="text-xs text-gray-500">
+                  期限日: {task.due_date ?? "未設定"}
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <details className="relative">
@@ -362,6 +415,15 @@ export default function Home() {
                             </option>
                           ))}
                         </select>
+                      </label>
+                      <label className="text-sm font-medium">
+                        期限日
+                        <input
+                          type="date"
+                          name="due_date"
+                          defaultValue={task.due_date ?? ""}
+                          className="mt-1 border rounded px-2 py-1 w-full"
+                        />
                       </label>
                       <button
                         type="submit"

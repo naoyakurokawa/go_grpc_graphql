@@ -6,8 +6,10 @@ package resolver
 
 import (
 	"context"
+	"strings"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
+	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
 )
 
@@ -27,13 +29,13 @@ func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, err
 }
 
 // Tasks is the resolver for the tasks field.
-func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error) {
-	var id *uint64
-	if categoryID != nil {
-		converted := uint64(*categoryID)
-		id = &converted
+func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string) ([]*model.Task, error) {
+	filter := repository.TaskFilter{
+		CategoryID:   categoryID,
+		DueDateStart: normalizeDateArg(dueDateStart),
+		DueDateEnd:   normalizeDateArg(dueDateEnd),
 	}
-	return r.TodoController.ListTasks(ctx, id)
+	return r.TodoController.ListTasks(ctx, filter)
 }
 
 // Mutation returns graph.MutationResolver implementation.
@@ -44,3 +46,14 @@ func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+func normalizeDateArg(value *string) *string {
+	if value == nil {
+		return nil
+	}
+	trimmed := strings.TrimSpace(*value)
+	if trimmed == "" {
+		return nil
+	}
+	return &trimmed
+}

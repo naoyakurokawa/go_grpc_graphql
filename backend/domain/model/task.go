@@ -8,6 +8,7 @@ type Task struct {
 	Title      string
 	Note       string
 	Completed  int32
+	DueDate    *time.Time
 	CategoryID uint64
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
@@ -19,4 +20,5 @@ type UpdateTaskRequest struct {
 	Note       *string
 	Completed  *int32
 	CategoryID *uint64
+	DueDate    *time.Time
 }

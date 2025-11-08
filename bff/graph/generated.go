@@ -60,13 +60,14 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Categories func(childComplexity int) int
-		Tasks      func(childComplexity int, categoryID *uint64) int
+		Tasks      func(childComplexity int, categoryID *uint64, dueDateStart *string, dueDateEnd *string) int
 	}
 
 	Task struct {
 		CategoryID func(childComplexity int) int
 		Completed  func(childComplexity int) int
 		CreatedAt  func(childComplexity int) int
+		DueDate    func(childComplexity int) int
 		ID         func(childComplexity int) int
 		Note       func(childComplexity int) int
 		Title      func(childComplexity int) int
@@ -80,7 +81,7 @@ type MutationResolver interface {
 	DeleteTask(ctx context.Context, id uint64) (bool, error)
 }
 type QueryResolver interface {
-	Tasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error)
+	Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string) ([]*model.Task, error)
 	Categories(ctx context.Context) ([]*model.Category, error)
 }
 
@@ -166,7 +167,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Tasks(childComplexity, args["category_id"].(*uint64)), true
+		return e.complexity.Query.Tasks(childComplexity, args["category_id"].(*uint64), args["due_date_start"].(*string), args["due_date_end"].(*string)), true
 
 	case "Task.category_id":
 		if e.complexity.Task.CategoryID == nil {
@@ -186,6 +187,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Task.CreatedAt(childComplexity), true
+	case "Task.due_date":
+		if e.complexity.Task.DueDate == nil {
+			break
+		}
+
+		return e.complexity.Task.DueDate(childComplexity), true
 	case "Task.id":
 		if e.complexity.Task.ID == nil {
 			break
@@ -390,6 +397,16 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["category_id"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "due_date_start", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["due_date_start"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "due_date_end", ec.unmarshalOString2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["due_date_end"] = arg2
 	return args, nil
 }
 
@@ -536,6 +553,8 @@ func (ec *executionContext) fieldContext_Mutation_createTask(ctx context.Context
 				return ec.fieldContext_Task_note(ctx, field)
 			case "category_id":
 				return ec.fieldContext_Task_category_id(ctx, field)
+			case "due_date":
+				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
 			case "created_at":
@@ -593,6 +612,8 @@ func (ec *executionContext) fieldContext_Mutation_updateTask(ctx context.Context
 				return ec.fieldContext_Task_note(ctx, field)
 			case "category_id":
 				return ec.fieldContext_Task_category_id(ctx, field)
+			case "due_date":
+				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
 			case "created_at":
@@ -666,7 +687,7 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_tasks,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Tasks(ctx, fc.Args["category_id"].(*uint64))
+			return ec.resolvers.Query().Tasks(ctx, fc.Args["category_id"].(*uint64), fc.Args["due_date_start"].(*string), fc.Args["due_date_end"].(*string))
 		},
 		nil,
 		ec.marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTaskᚄ,
@@ -691,6 +712,8 @@ func (ec *executionContext) fieldContext_Query_tasks(ctx context.Context, field 
 				return ec.fieldContext_Task_note(ctx, field)
 			case "category_id":
 				return ec.fieldContext_Task_category_id(ctx, field)
+			case "due_date":
+				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
 			case "created_at":
@@ -969,6 +992,35 @@ func (ec *executionContext) fieldContext_Task_category_id(_ context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Uint64 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Task_due_date(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Task_due_date,
+		func(ctx context.Context) (any, error) {
+			return obj.DueDate, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Task_due_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2514,7 +2566,7 @@ func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj any) 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "note", "category_id"}
+	fieldsInOrder := [...]string{"title", "note", "category_id", "due_date"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -2542,6 +2594,13 @@ func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj any) 
 				return it, err
 			}
 			it.CategoryID = data
+		case "due_date":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("due_date"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DueDate = data
 		}
 	}
 
@@ -2555,7 +2614,7 @@ func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "title", "note", "category_id", "completed"}
+	fieldsInOrder := [...]string{"id", "title", "note", "category_id", "due_date", "completed"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -2590,6 +2649,13 @@ func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj an
 				return it, err
 			}
 			it.CategoryID = data
+		case "due_date":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("due_date"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DueDate = data
 		case "completed":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("completed"))
 			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
@@ -2840,6 +2906,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "category_id":
 			out.Values[i] = ec._Task_category_id(ctx, field, obj)
+		case "due_date":
+			out.Values[i] = ec._Task_due_date(ctx, field, obj)
 		case "completed":
 			out.Values[i] = ec._Task_completed(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

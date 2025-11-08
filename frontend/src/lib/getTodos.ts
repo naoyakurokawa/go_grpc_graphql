@@ -6,6 +6,7 @@ export type Task = {
   title: string;
   note: string;
   category_id?: number | null;
+  due_date?: string | null;
   completed: number;
   created_at: string;
   updated_at: string;
@@ -21,12 +22,17 @@ export type GetTasksQuery = {
 };
 
 export const GET_TASKS = gql`
-  query GetTasks($categoryId: Uint64) {
-    tasks(category_id: $categoryId) {
+  query GetTasks($categoryId: Uint64, $dueDateStart: String, $dueDateEnd: String) {
+    tasks(
+      category_id: $categoryId
+      due_date_start: $dueDateStart
+      due_date_end: $dueDateEnd
+    ) {
       id
       title
       note
       category_id
+      due_date
       completed
       created_at
       updated_at
@@ -34,10 +40,14 @@ export const GET_TASKS = gql`
   }
 `;
 
-export async function getTasks(categoryId?: number): Promise<Task[]> {
+export async function getTasks(
+  categoryId?: number,
+  dueDateStart?: string,
+  dueDateEnd?: string,
+): Promise<Task[]> {
   const { data } = await client.query<GetTasksQuery>({
     query: GET_TASKS,
-    variables: { categoryId },
+    variables: { categoryId, dueDateStart, dueDateEnd },
   });
   return data.tasks;
 }
@@ -50,6 +60,7 @@ export type CreateTaskInput = {
   title: string;
   note: string;
   category_id: number;
+  due_date?: string | null;
 };
 
 export const CREATE_TASK = gql`
@@ -59,6 +70,7 @@ export const CREATE_TASK = gql`
       title
       note
       category_id
+      due_date
       completed
       created_at
       updated_at
@@ -88,6 +100,7 @@ export type UpdateTaskInput = {
   title?: string;
   note?: string;
   category_id?: number;
+  due_date?: string | null;
   completed?: number;
 };
 
@@ -98,6 +111,7 @@ export const UPDATE_TASK = gql`
       title
       note
       category_id
+      due_date
       completed
       created_at
       updated_at

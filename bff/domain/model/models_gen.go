@@ -11,9 +11,10 @@ type Mutation struct {
 }
 
 type NewTask struct {
-	Title      string `json:"title"`
-	Note       string `json:"note"`
-	CategoryID uint64 `json:"category_id"`
+	Title      string  `json:"title"`
+	Note       string  `json:"note"`
+	CategoryID uint64  `json:"category_id"`
+	DueDate    *string `json:"due_date,omitempty"`
 }
 
 type Query struct {
@@ -24,6 +25,7 @@ type Task struct {
 	Title      string  `json:"title"`
 	Note       string  `json:"note"`
 	CategoryID *uint64 `json:"category_id,omitempty"`
+	DueDate    *string `json:"due_date,omitempty"`
 	Completed  int32   `json:"completed"`
 	CreatedAt  string  `json:"created_at"`
 	UpdatedAt  string  `json:"updated_at"`
@@ -34,5 +36,6 @@ type UpdateTask struct {
 	Title      *string `json:"title,omitempty"`
 	Note       *string `json:"note,omitempty"`
 	CategoryID *uint64 `json:"category_id,omitempty"`
+	DueDate    *string `json:"due_date,omitempty"`
 	Completed  *int32  `json:"completed,omitempty"`
 }
