@@ -1,0 +1,34 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - 'Makefile'
+      - '.github/workflows/backend-test.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+
+      - name: Install gotip
+        run: |
+          go install golang.org/dl/gotip@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          gotip download
+
+      - name: Backend tests
+        run: |
+          cd backend
+          gotip test ./...
