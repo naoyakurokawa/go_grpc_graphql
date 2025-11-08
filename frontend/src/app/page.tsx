@@ -24,6 +24,7 @@ export default function Home() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [dueDateStartFilter, setDueDateStartFilter] = useState<string>("");
   const [dueDateEndFilter, setDueDateEndFilter] = useState<string>("");
+  const [incompleteOnly, setIncompleteOnly] = useState<boolean>(false);
 
   const categoryFilterValue = selectedCategoryId
     ? Number(selectedCategoryId)
@@ -34,8 +35,9 @@ export default function Home() {
       categoryId: categoryFilterValue,
       dueDateStart: dueDateStartFilter || null,
       dueDateEnd: dueDateEndFilter || null,
+      incompleteOnly,
     }),
-    [categoryFilterValue, dueDateStartFilter, dueDateEndFilter],
+    [categoryFilterValue, dueDateStartFilter, dueDateEndFilter, incompleteOnly],
   );
 
   const { data, loading, error } = useQuery<GetTasksResponse>(GET_TASKS, {
@@ -261,6 +263,14 @@ export default function Home() {
             />
           </label>
         </div>
+        <label className="text-sm font-medium flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={incompleteOnly}
+            onChange={(event) => setIncompleteOnly(event.target.checked)}
+          />
+          未完了のみ表示
+        </label>
         {categoriesError && (
           <p className="text-xs text-red-600">
             カテゴリの取得に失敗しました: {categoriesError.message}
@@ -336,6 +346,7 @@ export default function Home() {
             task.category_id != null
               ? categoryNameMap.get(task.category_id)
               : undefined;
+          const completedAtText = task.completed_at ?? "未設定";
 
           return (
             <li
@@ -362,6 +373,9 @@ export default function Home() {
                 </p>
                 <p className="text-xs text-gray-500">
                   期限日: {task.due_date ?? "未設定"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  完了日: {completedAtText}
                 </p>
               </div>
               <div className="flex items-start gap-3">

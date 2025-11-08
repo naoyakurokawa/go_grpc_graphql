@@ -21,14 +21,15 @@ type Query struct {
 }
 
 type Task struct {
-	ID         uint64  `json:"id"`
-	Title      string  `json:"title"`
-	Note       string  `json:"note"`
-	CategoryID *uint64 `json:"category_id,omitempty"`
-	DueDate    *string `json:"due_date,omitempty"`
-	Completed  int32   `json:"completed"`
-	CreatedAt  string  `json:"created_at"`
-	UpdatedAt  string  `json:"updated_at"`
+	ID          uint64  `json:"id"`
+	Title       string  `json:"title"`
+	Note        string  `json:"note"`
+	CategoryID  *uint64 `json:"category_id,omitempty"`
+	DueDate     *string `json:"due_date,omitempty"`
+	Completed   int32   `json:"completed"`
+	CompletedAt *string `json:"completed_at,omitempty"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
 }
 
 type UpdateTask struct {

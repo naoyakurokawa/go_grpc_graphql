@@ -60,18 +60,19 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Categories func(childComplexity int) int
-		Tasks      func(childComplexity int, categoryID *uint64, dueDateStart *string, dueDateEnd *string) int
+		Tasks      func(childComplexity int, categoryID *uint64, dueDateStart *string, dueDateEnd *string, incompleteOnly *bool) int
 	}
 
 	Task struct {
-		CategoryID func(childComplexity int) int
-		Completed  func(childComplexity int) int
-		CreatedAt  func(childComplexity int) int
-		DueDate    func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Note       func(childComplexity int) int
-		Title      func(childComplexity int) int
-		UpdatedAt  func(childComplexity int) int
+		CategoryID  func(childComplexity int) int
+		Completed   func(childComplexity int) int
+		CompletedAt func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		DueDate     func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Note        func(childComplexity int) int
+		Title       func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 }
 
@@ -81,7 +82,7 @@ type MutationResolver interface {
 	DeleteTask(ctx context.Context, id uint64) (bool, error)
 }
 type QueryResolver interface {
-	Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string) ([]*model.Task, error)
+	Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string, incompleteOnly *bool) ([]*model.Task, error)
 	Categories(ctx context.Context) ([]*model.Category, error)
 }
 
@@ -167,7 +168,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Tasks(childComplexity, args["category_id"].(*uint64), args["due_date_start"].(*string), args["due_date_end"].(*string)), true
+		return e.complexity.Query.Tasks(childComplexity, args["category_id"].(*uint64), args["due_date_start"].(*string), args["due_date_end"].(*string), args["incomplete_only"].(*bool)), true
 
 	case "Task.category_id":
 		if e.complexity.Task.CategoryID == nil {
@@ -181,6 +182,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Task.Completed(childComplexity), true
+	case "Task.completed_at":
+		if e.complexity.Task.CompletedAt == nil {
+			break
+		}
+
+		return e.complexity.Task.CompletedAt(childComplexity), true
 	case "Task.created_at":
 		if e.complexity.Task.CreatedAt == nil {
 			break
@@ -407,6 +414,11 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["due_date_end"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "incomplete_only", ec.unmarshalOBoolean2ᚖbool)
+	if err != nil {
+		return nil, err
+	}
+	args["incomplete_only"] = arg3
 	return args, nil
 }
 
@@ -557,6 +569,8 @@ func (ec *executionContext) fieldContext_Mutation_createTask(ctx context.Context
 				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
+			case "completed_at":
+				return ec.fieldContext_Task_completed_at(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Task_created_at(ctx, field)
 			case "updated_at":
@@ -616,6 +630,8 @@ func (ec *executionContext) fieldContext_Mutation_updateTask(ctx context.Context
 				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
+			case "completed_at":
+				return ec.fieldContext_Task_completed_at(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Task_created_at(ctx, field)
 			case "updated_at":
@@ -687,7 +703,7 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_tasks,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Tasks(ctx, fc.Args["category_id"].(*uint64), fc.Args["due_date_start"].(*string), fc.Args["due_date_end"].(*string))
+			return ec.resolvers.Query().Tasks(ctx, fc.Args["category_id"].(*uint64), fc.Args["due_date_start"].(*string), fc.Args["due_date_end"].(*string), fc.Args["incomplete_only"].(*bool))
 		},
 		nil,
 		ec.marshalNTask2ᚕᚖgithubᚗcomᚋnaoyakurokawaᚋgo_grpc_graphqlᚋdomainᚋmodelᚐTaskᚄ,
@@ -716,6 +732,8 @@ func (ec *executionContext) fieldContext_Query_tasks(ctx context.Context, field 
 				return ec.fieldContext_Task_due_date(ctx, field)
 			case "completed":
 				return ec.fieldContext_Task_completed(ctx, field)
+			case "completed_at":
+				return ec.fieldContext_Task_completed_at(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Task_created_at(ctx, field)
 			case "updated_at":
@@ -1050,6 +1068,35 @@ func (ec *executionContext) fieldContext_Task_completed(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Task_completed_at(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Task_completed_at,
+		func(ctx context.Context) (any, error) {
+			return obj.CompletedAt, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Task_completed_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2913,6 +2960,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "completed_at":
+			out.Values[i] = ec._Task_completed_at(ctx, field, obj)
 		case "created_at":
 			out.Values[i] = ec._Task_created_at(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

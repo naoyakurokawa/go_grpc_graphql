@@ -27,12 +27,13 @@ func NewTaskController(uc usecase.TaskUseCase) *TaskController {
 
 // GetTasks handles retrieval of all tasks with optional filtering.
 func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
-	log.Infof("received GetTasks request")
+	// log.Infof("received GetTasks request")
 	filter := repository.TaskFilter{}
 	if in != nil {
 		filter.CategoryID = in.CategoryId
 		filter.DueDateFrom = timestampToTime(in.DueDateStart)
 		filter.DueDateTo = timestampToTime(in.DueDateEnd)
+		filter.IncompleteOnly = in.IncompleteOnly
 	}
 	tasks, err := h.usecase.ListTasks(ctx, filter)
 	if err != nil {
@@ -93,14 +94,15 @@ func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {
 
 func toPBTask(task model.Task) (*pb.Task, error) {
 	return &pb.Task{
-		Id:         task.ID,
-		Title:      task.Title,
-		Note:       task.Note,
-		Completed:  task.Completed,
-		CategoryId: task.CategoryID,
-		DueDate:    timeToTimestamp(task.DueDate),
-		CreatedAt:  timestamppb.New(task.CreatedAt),
-		UpdatedAt:  timestamppb.New(task.UpdatedAt),
+		Id:          task.ID,
+		Title:       task.Title,
+		Note:        task.Note,
+		Completed:   task.Completed,
+		CompletedAt: timeToTimestamp(task.CompletedAt),
+		CategoryId:  task.CategoryID,
+		DueDate:     timeToTimestamp(task.DueDate),
+		CreatedAt:   timestamppb.New(task.CreatedAt),
+		UpdatedAt:   timestamppb.New(task.UpdatedAt),
 	}, nil
 }
 
@@ -123,9 +125,11 @@ func toUpdateTaskRequest(in *pb.UpdateTaskRequest) model.UpdateTaskRequest {
 	if in.Input.DueDate != nil {
 		req.DueDate = timestampToTime(in.Input.DueDate)
 	}
+	if in.Input.CompletedAt != nil {
+		req.CompletedAt = timestampToTime(in.Input.CompletedAt)
+	}
 	return req
 }
-
 func timestampToTime(ts *timestamppb.Timestamp) *time.Time {
 	if ts == nil {
 		return nil

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"backend/domain/model"
 	"backend/domain/repository"
@@ -51,6 +52,15 @@ func (uc *taskUseCase) UpdateTask(ctx context.Context, in model.UpdateTaskReques
 	}
 	if in.Completed != nil {
 		task.Completed = *in.Completed
+		if *in.Completed != 0 {
+			now := time.Now()
+			task.CompletedAt = &now
+		} else {
+			task.CompletedAt = nil
+		}
+	}
+	if in.CompletedAt != nil {
+		task.CompletedAt = in.CompletedAt
 	}
 	if in.CategoryID != nil {
 		task.CategoryID = *in.CategoryID

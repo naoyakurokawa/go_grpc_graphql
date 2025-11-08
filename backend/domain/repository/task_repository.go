@@ -16,7 +16,8 @@ type TaskRepository interface {
 }
 
 type TaskFilter struct {
-	CategoryID  *uint64
-	DueDateFrom *time.Time
-	DueDateTo   *time.Time
+	CategoryID     *uint64
+	DueDateFrom    *time.Time
+	DueDateTo      *time.Time
+	IncompleteOnly *bool
 }
