@@ -20,11 +20,17 @@ func NewTaskRepository(db *gorm.DB) repository.TaskRepository {
 	return &TaskRepository{db: db}
 }
 
-// FindAll retrieves every task, optionally filtered by category.
-func (r *TaskRepository) FindAll(ctx context.Context, categoryID *uint64) ([]model.Task, error) {
+// FindAll retrieves every task, filtered by provided criteria.
+func (r *TaskRepository) FindAll(ctx context.Context, filter repository.TaskFilter) ([]model.Task, error) {
 	query := r.db
-	if categoryID != nil {
-		query = query.Where("category_id = ?", *categoryID)
+	if filter.CategoryID != nil {
+		query = query.Where("category_id = ?", *filter.CategoryID)
+	}
+	if filter.DueDateFrom != nil {
+		query = query.Where("due_date >= ?", filter.DueDateFrom.Format("2006-01-02"))
+	}
+	if filter.DueDateTo != nil {
+		query = query.Where("due_date <= ?", filter.DueDateTo.Format("2006-01-02"))
 	}
 
 	var taskDTOs []dto.Task

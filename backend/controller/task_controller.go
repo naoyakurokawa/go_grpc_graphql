@@ -2,8 +2,10 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"backend/domain/model"
+	"backend/domain/repository"
 	"backend/usecase"
 
 	pb "backend/pkg/pb"
@@ -26,11 +28,13 @@ func NewTaskController(uc usecase.TaskUseCase) *TaskController {
 // GetTasks handles retrieval of all tasks with optional filtering.
 func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
 	log.Infof("received GetTasks request")
-	var categoryID *uint64
+	filter := repository.TaskFilter{}
 	if in != nil {
-		categoryID = in.CategoryId
+		filter.CategoryID = in.CategoryId
+		filter.DueDateFrom = timestampToTime(in.DueDateStart)
+		filter.DueDateTo = timestampToTime(in.DueDateEnd)
 	}
-	tasks, err := h.usecase.ListTasks(ctx, categoryID)
+	tasks, err := h.usecase.ListTasks(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +85,7 @@ func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {
 	return model.Task{
 		Title:      in.Input.Title,
 		Note:       in.Input.Note,
+		DueDate:    timestampToTime(in.Input.DueDate),
 		CategoryID: in.Input.CategoryId,
 		Completed:  0,
 	}
@@ -93,6 +98,7 @@ func toPBTask(task model.Task) (*pb.Task, error) {
 		Note:       task.Note,
 		Completed:  task.Completed,
 		CategoryId: task.CategoryID,
+		DueDate:    timeToTimestamp(task.DueDate),
 		CreatedAt:  timestamppb.New(task.CreatedAt),
 		UpdatedAt:  timestamppb.New(task.UpdatedAt),
 	}, nil
@@ -114,5 +120,25 @@ func toUpdateTaskRequest(in *pb.UpdateTaskRequest) model.UpdateTaskRequest {
 	if in.Input.CategoryId != nil {
 		req.CategoryID = in.Input.CategoryId
 	}
+	if in.Input.DueDate != nil {
+		req.DueDate = timestampToTime(in.Input.DueDate)
+	}
 	return req
+}
+
+func timestampToTime(ts *timestamppb.Timestamp) *time.Time {
+	if ts == nil {
+		return nil
+	}
+
+	t := ts.AsTime()
+	return &t
+}
+
+func timeToTimestamp(t *time.Time) *timestamppb.Timestamp {
+	if t == nil {
+		return nil
+	}
+
+	return timestamppb.New(*t)
 }

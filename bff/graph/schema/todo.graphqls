@@ -1,7 +1,7 @@
 scalar Uint64
 
 type Query {
-  tasks(category_id: Uint64): [Task!]!
+  tasks(category_id: Uint64, due_date_start: String, due_date_end: String): [Task!]!
 }
 
 type Task {
@@ -9,6 +9,7 @@ type Task {
   title: String!
   note: String!
   category_id: Uint64
+  due_date: String
   completed: Int!
   created_at: String!
   updated_at: String!
@@ -24,6 +25,7 @@ input NewTask {
   title: String!
   note: String!
   category_id: Uint64!
+  due_date: String
 }
 
 input UpdateTask {
@@ -31,5 +33,6 @@ input UpdateTask {
   title: String
   note: String
   category_id: Uint64
+  due_date: String
   completed: Int
 }

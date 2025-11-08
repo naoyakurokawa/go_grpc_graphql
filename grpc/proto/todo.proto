@@ -14,12 +14,14 @@ message Task {
   google.protobuf.Timestamp created_at = 5;
   google.protobuf.Timestamp updated_at = 6;
   uint64 category_id = 7;
+  google.protobuf.Timestamp due_date = 8;
 }
 
 message NewTask {
   string title = 1;
   string note = 2;
   uint64 category_id = 3;
+  google.protobuf.Timestamp due_date = 4;
 }
 
 message UpdateTask {
@@ -28,6 +30,7 @@ message UpdateTask {
   optional string note = 3;
   optional int32 completed = 4;
   optional uint64 category_id = 5;
+  optional google.protobuf.Timestamp due_date = 6;
 }
 
 message TaskList {
@@ -40,6 +43,8 @@ message TaskId {
 
 message GetTasksRequest {
   optional uint64 category_id = 1;
+  optional google.protobuf.Timestamp due_date_start = 2;
+  optional google.protobuf.Timestamp due_date_end = 3;
 }
 
 message CreateTaskRequest {

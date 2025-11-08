@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
+	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
 	"github.com/naoyakurokawa/go_grpc_graphql/usecase"
 )
 
@@ -48,8 +49,8 @@ func (c *TodoController) DeleteTask(ctx context.Context, id uint64) (bool, error
 	return ok, nil
 }
 
-func (c *TodoController) ListTasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error) {
-	tasks, err := c.usecase.ListTasks(ctx, categoryID)
+func (c *TodoController) ListTasks(ctx context.Context, filter repository.TaskFilter) ([]*model.Task, error) {
+	tasks, err := c.usecase.ListTasks(ctx, filter)
 	if err != nil {
 		log.Printf("failed to fetch tasks: %v", err)
 		return nil, err
