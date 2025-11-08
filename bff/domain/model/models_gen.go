@@ -2,29 +2,37 @@
 
 package model
 
+type Category struct {
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
+}
+
 type Mutation struct {
 }
 
 type NewTask struct {
-	Title string `json:"title"`
-	Note  string `json:"note"`
+	Title      string `json:"title"`
+	Note       string `json:"note"`
+	CategoryID uint64 `json:"category_id"`
 }
 
 type Query struct {
 }
 
 type Task struct {
-	ID        uint64 `json:"id"`
-	Title     string `json:"title"`
-	Note      string `json:"note"`
-	Completed int32  `json:"completed"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	ID         uint64  `json:"id"`
+	Title      string  `json:"title"`
+	Note       string  `json:"note"`
+	CategoryID *uint64 `json:"category_id,omitempty"`
+	Completed  int32   `json:"completed"`
+	CreatedAt  string  `json:"created_at"`
+	UpdatedAt  string  `json:"updated_at"`
 }
 
 type UpdateTask struct {
-	ID        uint64  `json:"id"`
-	Title     *string `json:"title,omitempty"`
-	Note      *string `json:"note,omitempty"`
-	Completed *int32  `json:"completed,omitempty"`
+	ID         uint64  `json:"id"`
+	Title      *string `json:"title,omitempty"`
+	Note       *string `json:"note,omitempty"`
+	CategoryID *uint64 `json:"category_id,omitempty"`
+	Completed  *int32  `json:"completed,omitempty"`
 }

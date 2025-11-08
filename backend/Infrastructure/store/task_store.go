@@ -20,11 +20,21 @@ func NewTaskRepository(db *gorm.DB) repository.TaskRepository {
 	return &TaskRepository{db: db}
 }
 
-// FindAll retrieves every task.
-func (r *TaskRepository) FindAll(ctx context.Context) ([]model.Task, error) {
-	var tasks []model.Task
-	if err := r.db.Find(&tasks).Error; err != nil {
+// FindAll retrieves every task, optionally filtered by category.
+func (r *TaskRepository) FindAll(ctx context.Context, categoryID *uint64) ([]model.Task, error) {
+	query := r.db
+	if categoryID != nil {
+		query = query.Where("category_id = ?", *categoryID)
+	}
+
+	var taskDTOs []dto.Task
+	if err := query.Find(&taskDTOs).Error; err != nil {
 		return nil, err
+	}
+
+	tasks := make([]model.Task, 0, len(taskDTOs))
+	for _, t := range taskDTOs {
+		tasks = append(tasks, t.ToModel())
 	}
 
 	return tasks, nil

@@ -1,13 +1,14 @@
 scalar Uint64
 
 type Query {
-  tasks: [Task!]!
+  tasks(category_id: Uint64): [Task!]!
 }
 
 type Task {
   id: Uint64!
   title: String!
   note: String!
+  category_id: Uint64
   completed: Int!
   created_at: String!
   updated_at: String!
@@ -22,11 +23,13 @@ type Mutation {
 input NewTask {
   title: String!
   note: String!
+  category_id: Uint64!
 }
 
 input UpdateTask {
   id: Uint64!
   title: String
   note: String
+  category_id: Uint64
   completed: Int
 }

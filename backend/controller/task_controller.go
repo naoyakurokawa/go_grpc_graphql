@@ -9,7 +9,6 @@ import (
 	pb "backend/pkg/pb"
 
 	"github.com/labstack/gommon/log"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -24,10 +23,14 @@ func NewTaskHandler(uc usecase.TaskUseCase) *TaskHandler {
 	return &TaskHandler{usecase: uc}
 }
 
-// GetTasks handles retrieval of all tasks.
-func (h *TaskHandler) GetTasks(ctx context.Context, _ *emptypb.Empty) (*pb.TaskList, error) {
+// GetTasks handles retrieval of all tasks with optional filtering.
+func (h *TaskHandler) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
 	log.Infof("received GetTasks request")
-	tasks, err := h.usecase.ListTasks(ctx)
+	var categoryID *uint64
+	if in != nil {
+		categoryID = in.CategoryId
+	}
+	tasks, err := h.usecase.ListTasks(ctx, categoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,20 +79,22 @@ func (h *TaskHandler) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.Delete
 
 func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {
 	return model.Task{
-		Title:     in.Input.Title,
-		Note:      in.Input.Note,
-		Completed: 0,
+		Title:      in.Input.Title,
+		Note:       in.Input.Note,
+		CategoryID: in.Input.CategoryId,
+		Completed:  0,
 	}
 }
 
 func toPBTask(task model.Task) (*pb.Task, error) {
 	return &pb.Task{
-		Id:        task.ID,
-		Title:     task.Title,
-		Note:      task.Note,
-		Completed: task.Completed,
-		CreatedAt: timestamppb.New(task.CreatedAt),
-		UpdatedAt: timestamppb.New(task.UpdatedAt),
+		Id:         task.ID,
+		Title:      task.Title,
+		Note:       task.Note,
+		Completed:  task.Completed,
+		CategoryId: task.CategoryID,
+		CreatedAt:  timestamppb.New(task.CreatedAt),
+		UpdatedAt:  timestamppb.New(task.UpdatedAt),
 	}, nil
 }
 
@@ -105,6 +110,9 @@ func toUpdateTaskRequest(in *pb.UpdateTaskRequest) model.UpdateTaskRequest {
 	}
 	if in.Input.Completed != nil {
 		req.Completed = in.Input.Completed
+	}
+	if in.Input.CategoryId != nil {
+		req.CategoryID = in.Input.CategoryId
 	}
 	return req
 }

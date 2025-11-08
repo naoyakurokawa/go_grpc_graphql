@@ -4,17 +4,19 @@ import "time"
 
 // Task represents a todo task entity.
 type Task struct {
-	ID        uint64
-	Title     string
-	Note      string
-	Completed int32
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         uint64
+	Title      string
+	Note       string
+	Completed  int32
+	CategoryID uint64
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type UpdateTaskRequest struct {
-	ID        uint64
-	Title     *string
-	Note      *string
-	Completed *int32
+	ID         uint64
+	Title      *string
+	Note       *string
+	Completed  *int32
+	CategoryID *uint64
 }

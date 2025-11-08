@@ -31,11 +31,16 @@ func main() {
 	defer conn.Close()
 
 	// gRPC クライアントを作成
-	grpcClient := pb.NewTaskServiceClient(conn)
+	taskClient := pb.NewTaskServiceClient(conn)
+	categoryClient := pb.NewCategoryServiceClient(conn)
 
-	repo := store.NewTodoStore(grpcClient)
-	todoUsecase := usecase.NewTodoUsecase(repo)
+	todoRepo := store.NewTodoStore(taskClient)
+	categoryRepo := store.NewCategoryStore(categoryClient)
+
+	todoUsecase := usecase.NewTodoUsecase(todoRepo)
 	todoController := controller.NewTodoController(todoUsecase)
+	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
+	categoryController := controller.NewCategoryController(categoryUsecase)
 
 	e := echo.New()
 
@@ -58,7 +63,10 @@ func main() {
 
 	graphqlHandler := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
-			graph.Config{Resolvers: &resolver.Resolver{TodoController: todoController}},
+			graph.Config{Resolvers: &resolver.Resolver{
+				TodoController:     todoController,
+				CategoryController: categoryController,
+			}},
 		),
 	)
 	playgroundHandler := playground.Handler("GraphQL", "/query")

@@ -1,0 +1,8 @@
+extend type Query {
+  categories: [Category!]!
+}
+
+type Category {
+  id: Uint64!
+  name: String!
+}

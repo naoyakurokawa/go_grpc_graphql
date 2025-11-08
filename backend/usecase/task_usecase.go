@@ -9,7 +9,7 @@ import (
 
 // TaskUseCase defines the business logic contract for tasks.
 type TaskUseCase interface {
-	ListTasks(ctx context.Context) ([]model.Task, error)
+	ListTasks(ctx context.Context, categoryID *uint64) ([]model.Task, error)
 	CreateTask(ctx context.Context, in model.Task) (*model.Task, error)
 	UpdateTask(ctx context.Context, in model.UpdateTaskRequest) (*model.Task, error)
 	DeleteTask(ctx context.Context, id uint64) error
@@ -25,8 +25,8 @@ func NewTaskUseCase(repo repository.TaskRepository) TaskUseCase {
 }
 
 // ListTasks returns all tasks.
-func (uc *taskUseCase) ListTasks(ctx context.Context) ([]model.Task, error) {
-	return uc.repo.FindAll(ctx)
+func (uc *taskUseCase) ListTasks(ctx context.Context, categoryID *uint64) ([]model.Task, error) {
+	return uc.repo.FindAll(ctx, categoryID)
 }
 
 // CreateTask creates and persists a new task.
@@ -51,6 +51,9 @@ func (uc *taskUseCase) UpdateTask(ctx context.Context, in model.UpdateTaskReques
 	}
 	if in.Completed != nil {
 		task.Completed = *in.Completed
+	}
+	if in.CategoryID != nil {
+		task.CategoryID = *in.CategoryID
 	}
 
 	// 3. リポジトリ層に保存

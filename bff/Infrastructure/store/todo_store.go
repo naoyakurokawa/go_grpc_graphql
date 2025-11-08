@@ -7,7 +7,6 @@ import (
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
 	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -26,8 +25,9 @@ func NewTodoStore(client pb.TaskServiceClient) repository.TodoRepository {
 func (s *TodoStore) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
 	req := &pb.CreateTaskRequest{
 		Input: &pb.NewTask{
-			Title: input.Title,
-			Note:  input.Note,
+			Title:      input.Title,
+			Note:       input.Note,
+			CategoryId: input.CategoryID,
 		},
 	}
 
@@ -55,6 +55,10 @@ func (s *TodoStore) UpdateTask(ctx context.Context, input model.UpdateTask) (*mo
 	if input.Completed != nil {
 		req.Input.Completed = input.Completed
 	}
+	if input.CategoryID != nil {
+		value := *input.CategoryID
+		req.Input.CategoryId = &value
+	}
 
 	res, err := s.client.UpdateTask(ctx, req)
 	if err != nil {
@@ -75,8 +79,13 @@ func (s *TodoStore) DeleteTask(ctx context.Context, id uint64) (bool, error) {
 	return res.Success, nil
 }
 
-func (s *TodoStore) ListTasks(ctx context.Context) ([]*model.Task, error) {
-	res, err := s.client.GetTasks(ctx, &emptypb.Empty{})
+func (s *TodoStore) ListTasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error) {
+	req := &pb.GetTasksRequest{}
+	if categoryID != nil {
+		req.CategoryId = categoryID
+	}
+
+	res, err := s.client.GetTasks(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -95,13 +104,22 @@ func toDomainTask(task *pb.Task) *model.Task {
 	}
 
 	return &model.Task{
-		ID:        task.GetId(),
-		Title:     task.GetTitle(),
-		Note:      task.GetNote(),
-		Completed: task.GetCompleted(),
-		CreatedAt: formatTimestamp(task.GetCreatedAt()),
-		UpdatedAt: formatTimestamp(task.GetUpdatedAt()),
+		ID:         task.GetId(),
+		Title:      task.GetTitle(),
+		Note:       task.GetNote(),
+		Completed:  task.GetCompleted(),
+		CategoryID: toUint64Ptr(task.GetCategoryId()),
+		CreatedAt:  formatTimestamp(task.GetCreatedAt()),
+		UpdatedAt:  formatTimestamp(task.GetUpdatedAt()),
 	}
+}
+
+func toUint64Ptr(v uint64) *uint64 {
+	if v == 0 {
+		return nil
+	}
+	val := v
+	return &val
 }
 
 func formatTimestamp(ts *timestamppb.Timestamp) string {

@@ -1,12 +1,14 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import {
   CREATE_TASK,
   DELETE_TASK,
+  GET_CATEGORIES,
   GET_TASKS,
   UPDATE_TASK,
+  Category,
   Task,
 } from "../lib/getTodos";
 
@@ -14,26 +16,62 @@ type GetTasksResponse = {
   tasks: Task[];
 };
 
+type GetCategoriesResponse = {
+  categories: Category[];
+};
+
 export default function Home() {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+
+  const categoryFilterValue = selectedCategoryId
+    ? Number(selectedCategoryId)
+    : null;
+
+  const taskVariables = useMemo(
+    () => ({ categoryId: categoryFilterValue }),
+    [categoryFilterValue],
+  );
+
   const { data, loading, error } = useQuery<GetTasksResponse>(GET_TASKS, {
+    variables: taskVariables,
     fetchPolicy: "cache-and-network",
   });
+
+  const {
+    data: categoriesData,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useQuery<GetCategoriesResponse>(GET_CATEGORIES);
+
+  const categories = categoriesData?.categories ?? [];
+  const categoryNameMap = useMemo(() => {
+    const map = new Map<number, string>();
+    categories.forEach((category) => {
+      map.set(category.id, category.name);
+    });
+    return map;
+  }, [categories]);
+
+  const taskRefetchQueries = useMemo(
+    () => [{ query: GET_TASKS, variables: taskVariables }],
+    [taskVariables],
+  );
 
   const [createTaskMutation, { loading: creating }] = useMutation(
     CREATE_TASK,
     {
-      refetchQueries: [{ query: GET_TASKS }],
+      refetchQueries: taskRefetchQueries,
       awaitRefetchQueries: true,
     },
   );
 
   const [updateTaskMutation] = useMutation(UPDATE_TASK, {
-    refetchQueries: [{ query: GET_TASKS }],
+    refetchQueries: taskRefetchQueries,
     awaitRefetchQueries: true,
   });
 
   const [deleteTaskMutation] = useMutation(DELETE_TASK, {
-    refetchQueries: [{ query: GET_TASKS }],
+    refetchQueries: taskRefetchQueries,
     awaitRefetchQueries: true,
   });
 
@@ -47,13 +85,19 @@ export default function Home() {
     const formData = new FormData(form);
     const title = (formData.get("title") as string | null)?.trim();
     const note = (formData.get("note") as string | null)?.trim();
+    const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
 
-    if (!title || !note) {
+    if (!title || !note || !categoryIdRaw) {
+      return;
+    }
+
+    const categoryId = Number(categoryIdRaw);
+    if (!Number.isFinite(categoryId)) {
       return;
     }
 
     await createTaskMutation({
-      variables: { input: { title, note } },
+      variables: { input: { title, note, category_id: categoryId } },
     });
 
     form.reset();
@@ -81,6 +125,7 @@ export default function Home() {
       id: number;
       title?: string;
       note?: string;
+      category_id?: number;
     } = { id };
 
     if (title) {
@@ -91,7 +136,19 @@ export default function Home() {
       input.note = note;
     }
 
-    if (input.title === undefined && input.note === undefined) {
+    const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
+    if (categoryIdRaw) {
+      const categoryId = Number(categoryIdRaw);
+      if (Number.isFinite(categoryId)) {
+        input.category_id = categoryId;
+      }
+    }
+
+    if (
+      input.title === undefined &&
+      input.note === undefined &&
+      input.category_id === undefined
+    ) {
       return;
     }
 
@@ -142,6 +199,30 @@ export default function Home() {
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">Todo List</h1>
 
+      <section className="mb-6 flex flex-col gap-2">
+        <label className="text-sm font-medium">
+          カテゴリで絞り込み
+          <select
+            value={selectedCategoryId}
+            onChange={(event) => setSelectedCategoryId(event.target.value)}
+            className="mt-1 border rounded px-3 py-2 w-full max-w-xs"
+            disabled={categoriesLoading}
+          >
+            <option value="">すべて</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {categoriesError && (
+          <p className="text-xs text-red-600">
+            カテゴリの取得に失敗しました: {categoriesError.message}
+          </p>
+        )}
+      </section>
+
       <section className="mb-6">
         <form onSubmit={handleCreate} className="flex flex-wrap gap-2">
           <input
@@ -158,10 +239,26 @@ export default function Home() {
             className="border rounded px-3 py-2 flex-1 min-w-[200px] resize-y"
             required
           />
+          <select
+            name="category_id"
+            defaultValue=""
+            required
+            className="border rounded px-3 py-2 flex-1 min-w-[200px]"
+            disabled={categoriesLoading || categories.length === 0}
+          >
+            <option value="" disabled>
+              カテゴリを選択
+            </option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={creating}
+            disabled={creating || categories.length === 0}
           >
             {creating ? "追加中..." : "追加"}
           </button>
@@ -185,6 +282,10 @@ export default function Home() {
       <ul className="space-y-4 mt-4">
         {tasks.map((task) => {
           const isCompleted = Boolean(task.completed);
+          const categoryName =
+            task.category_id != null
+              ? categoryNameMap.get(task.category_id)
+              : undefined;
 
           return (
             <li
@@ -205,6 +306,9 @@ export default function Home() {
                   }`}
                 >
                   {task.note}
+                </p>
+                <p className="text-xs text-gray-500">
+                  カテゴリ: {categoryName ?? "未選択"}
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -236,6 +340,28 @@ export default function Home() {
                           rows={3}
                           className="mt-1 border rounded px-2 py-1 w-full resize-y"
                         />
+                      </label>
+                      <label className="text-sm font-medium">
+                        カテゴリ
+                        <select
+                          name="category_id"
+                          defaultValue={
+                            task.category_id != null
+                              ? String(task.category_id)
+                              : ""
+                          }
+                          className="mt-1 border rounded px-2 py-1 w-full"
+                          disabled={categories.length === 0}
+                        >
+                          <option value="">
+                            {task.category_id == null ? "未選択" : "変更しない"}
+                          </option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
                       </label>
                       <button
                         type="submit"

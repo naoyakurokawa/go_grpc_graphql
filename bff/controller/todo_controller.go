@@ -48,8 +48,8 @@ func (c *TodoController) DeleteTask(ctx context.Context, id uint64) (bool, error
 	return ok, nil
 }
 
-func (c *TodoController) ListTasks(ctx context.Context) ([]*model.Task, error) {
-	tasks, err := c.usecase.ListTasks(ctx)
+func (c *TodoController) ListTasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error) {
+	tasks, err := c.usecase.ListTasks(ctx, categoryID)
 	if err != nil {
 		log.Printf("failed to fetch tasks: %v", err)
 		return nil, err

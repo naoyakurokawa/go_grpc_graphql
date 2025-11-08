@@ -5,9 +5,15 @@ export type Task = {
   id: number;
   title: string;
   note: string;
+  category_id?: number | null;
   completed: number;
   created_at: string;
   updated_at: string;
+};
+
+export type Category = {
+  id: number;
+  name: string;
 };
 
 export type GetTasksQuery = {
@@ -15,11 +21,12 @@ export type GetTasksQuery = {
 };
 
 export const GET_TASKS = gql`
-  query GetTasks {
-    tasks {
+  query GetTasks($categoryId: Uint64) {
+    tasks(category_id: $categoryId) {
       id
       title
       note
+      category_id
       completed
       created_at
       updated_at
@@ -27,8 +34,11 @@ export const GET_TASKS = gql`
   }
 `;
 
-export async function getTasks(): Promise<Task[]> {
-  const { data } = await client.query<GetTasksQuery>({ query: GET_TASKS });
+export async function getTasks(categoryId?: number): Promise<Task[]> {
+  const { data } = await client.query<GetTasksQuery>({
+    query: GET_TASKS,
+    variables: { categoryId },
+  });
   return data.tasks;
 }
 
@@ -39,6 +49,7 @@ export type CreateTaskMutation = {
 export type CreateTaskInput = {
   title: string;
   note: string;
+  category_id: number;
 };
 
 export const CREATE_TASK = gql`
@@ -47,6 +58,7 @@ export const CREATE_TASK = gql`
       id
       title
       note
+      category_id
       completed
       created_at
       updated_at
@@ -75,6 +87,7 @@ export type UpdateTaskInput = {
   id: number;
   title?: string;
   note?: string;
+  category_id?: number;
   completed?: number;
 };
 
@@ -84,6 +97,7 @@ export const UPDATE_TASK = gql`
       id
       title
       note
+      category_id
       completed
       created_at
       updated_at
@@ -111,6 +125,19 @@ export type DeleteTaskMutation = {
 export const DELETE_TASK = gql`
   mutation DeleteTask($id: Uint64!) {
     deleteTask(id: $id)
+  }
+`;
+
+export type GetCategoriesQuery = {
+  categories: Category[];
+};
+
+export const GET_CATEGORIES = gql`
+  query GetCategories {
+    categories {
+      id
+      name
+    }
   }
 `;
 

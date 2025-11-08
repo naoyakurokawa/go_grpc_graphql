@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
+	"github.com/naoyakurokawa/go_grpc_graphql/graph"
 )
 
 // CreateTask is the resolver for the createTask field.
@@ -26,6 +27,20 @@ func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, err
 }
 
 // Tasks is the resolver for the tasks field.
-func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
-	return r.TodoController.ListTasks(ctx)
+func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64) ([]*model.Task, error) {
+	var id *uint64
+	if categoryID != nil {
+		converted := uint64(*categoryID)
+		id = &converted
+	}
+	return r.TodoController.ListTasks(ctx, id)
 }
+
+// Mutation returns graph.MutationResolver implementation.
+func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
+
+// Query returns graph.QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
