@@ -29,11 +29,12 @@ func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, err
 }
 
 // Tasks is the resolver for the tasks field.
-func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string) ([]*model.Task, error) {
+func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64, dueDateStart *string, dueDateEnd *string, incompleteOnly *bool) ([]*model.Task, error) {
 	filter := repository.TaskFilter{
-		CategoryID:   categoryID,
-		DueDateStart: normalizeDateArg(dueDateStart),
-		DueDateEnd:   normalizeDateArg(dueDateEnd),
+		CategoryID:     categoryID,
+		DueDateStart:   normalizeDateArg(dueDateStart),
+		DueDateEnd:     normalizeDateArg(dueDateEnd),
+		IncompleteOnly: incompleteOnly != nil && *incompleteOnly,
 	}
 	return r.TodoController.ListTasks(ctx, filter)
 }

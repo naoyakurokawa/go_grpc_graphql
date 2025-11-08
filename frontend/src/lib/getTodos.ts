@@ -8,6 +8,7 @@ export type Task = {
   category_id?: number | null;
   due_date?: string | null;
   completed: number;
+  completed_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -22,11 +23,17 @@ export type GetTasksQuery = {
 };
 
 export const GET_TASKS = gql`
-  query GetTasks($categoryId: Uint64, $dueDateStart: String, $dueDateEnd: String) {
+  query GetTasks(
+    $categoryId: Uint64
+    $dueDateStart: String
+    $dueDateEnd: String
+    $incompleteOnly: Boolean
+  ) {
     tasks(
       category_id: $categoryId
       due_date_start: $dueDateStart
       due_date_end: $dueDateEnd
+      incomplete_only: $incompleteOnly
     ) {
       id
       title
@@ -34,6 +41,7 @@ export const GET_TASKS = gql`
       category_id
       due_date
       completed
+      completed_at
       created_at
       updated_at
     }
@@ -44,10 +52,11 @@ export async function getTasks(
   categoryId?: number,
   dueDateStart?: string,
   dueDateEnd?: string,
+  incompleteOnly?: boolean,
 ): Promise<Task[]> {
   const { data } = await client.query<GetTasksQuery>({
     query: GET_TASKS,
-    variables: { categoryId, dueDateStart, dueDateEnd },
+    variables: { categoryId, dueDateStart, dueDateEnd, incompleteOnly },
   });
   return data.tasks;
 }
@@ -72,6 +81,7 @@ export const CREATE_TASK = gql`
       category_id
       due_date
       completed
+      completed_at
       created_at
       updated_at
     }
@@ -113,6 +123,7 @@ export const UPDATE_TASK = gql`
       category_id
       due_date
       completed
+      completed_at
       created_at
       updated_at
     }

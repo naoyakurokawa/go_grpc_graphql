@@ -115,6 +115,9 @@ func (s *TodoStore) ListTasks(ctx context.Context, filter repository.TaskFilter)
 		}
 		req.DueDateEnd = ts
 	}
+	if filter.IncompleteOnly {
+		req.IncompleteOnly = &filter.IncompleteOnly
+	}
 
 	res, err := s.client.GetTasks(ctx, req)
 	if err != nil {
@@ -135,14 +138,15 @@ func toDomainTask(task *pb.Task) *model.Task {
 	}
 
 	return &model.Task{
-		ID:         task.GetId(),
-		Title:      task.GetTitle(),
-		Note:       task.GetNote(),
-		Completed:  task.GetCompleted(),
-		CategoryID: toUint64Ptr(task.GetCategoryId()),
-		DueDate:    formatDate(task.GetDueDate()),
-		CreatedAt:  formatTimestamp(task.GetCreatedAt()),
-		UpdatedAt:  formatTimestamp(task.GetUpdatedAt()),
+		ID:          task.GetId(),
+		Title:       task.GetTitle(),
+		Note:        task.GetNote(),
+		Completed:   task.GetCompleted(),
+		CategoryID:  toUint64Ptr(task.GetCategoryId()),
+		DueDate:     formatDate(task.GetDueDate()),
+		CompletedAt: formatTimestampPtr(task.GetCompletedAt()),
+		CreatedAt:   formatTimestamp(task.GetCreatedAt()),
+		UpdatedAt:   formatTimestamp(task.GetUpdatedAt()),
 	}
 }
 
@@ -168,6 +172,15 @@ func formatDate(ts *timestamppb.Timestamp) *string {
 	}
 
 	formatted := ts.AsTime().In(time.Local).Format(dateLayout)
+	return &formatted
+}
+
+func formatTimestampPtr(ts *timestamppb.Timestamp) *string {
+	if ts == nil {
+		return nil
+	}
+
+	formatted := formatTimestamp(ts)
 	return &formatted
 }
 

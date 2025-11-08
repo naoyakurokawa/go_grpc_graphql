@@ -32,6 +32,7 @@ type Task struct {
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	CategoryId    uint64                 `protobuf:"varint,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	DueDate       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	CompletedAt   *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,6 +123,13 @@ func (x *Task) GetDueDate() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Task) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
 type NewTask struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -198,6 +206,7 @@ type UpdateTask struct {
 	Completed     *int32                 `protobuf:"varint,4,opt,name=completed,proto3,oneof" json:"completed,omitempty"`
 	CategoryId    *uint64                `protobuf:"varint,5,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
 	DueDate       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=due_date,json=dueDate,proto3,oneof" json:"due_date,omitempty"`
+	CompletedAt   *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=completed_at,json=completedAt,proto3,oneof" json:"completed_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -270,6 +279,13 @@ func (x *UpdateTask) GetCategoryId() uint64 {
 func (x *UpdateTask) GetDueDate() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DueDate
+	}
+	return nil
+}
+
+func (x *UpdateTask) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
 	}
 	return nil
 }
@@ -363,12 +379,13 @@ func (x *TaskId) GetId() uint64 {
 }
 
 type GetTasksRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CategoryId    *uint64                `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
-	DueDateStart  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=due_date_start,json=dueDateStart,proto3,oneof" json:"due_date_start,omitempty"`
-	DueDateEnd    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=due_date_end,json=dueDateEnd,proto3,oneof" json:"due_date_end,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	CategoryId     *uint64                `protobuf:"varint,1,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id,omitempty"`
+	DueDateStart   *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=due_date_start,json=dueDateStart,proto3,oneof" json:"due_date_start,omitempty"`
+	DueDateEnd     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=due_date_end,json=dueDateEnd,proto3,oneof" json:"due_date_end,omitempty"`
+	IncompleteOnly *bool                  `protobuf:"varint,4,opt,name=incomplete_only,json=incompleteOnly,proto3,oneof" json:"incomplete_only,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *GetTasksRequest) Reset() {
@@ -420,6 +437,13 @@ func (x *GetTasksRequest) GetDueDateEnd() *timestamppb.Timestamp {
 		return x.DueDateEnd
 	}
 	return nil
+}
+
+func (x *GetTasksRequest) GetIncompleteOnly() bool {
+	if x != nil && x.IncompleteOnly != nil {
+		return *x.IncompleteOnly
+	}
+	return false
 }
 
 type CreateTaskRequest struct {
@@ -559,7 +583,7 @@ var File_todo_proto protoreflect.FileDescriptor
 const file_todo_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"todo.proto\x12\x04task\x1a\x1fgoogle/protobuf/timestamp.proto\"\xac\x02\n" +
+	"todo.proto\x12\x04task\x1a\x1fgoogle/protobuf/timestamp.proto\"\xeb\x02\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -571,13 +595,14 @@ const file_todo_proto_rawDesc = "" +
 	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x1f\n" +
 	"\vcategory_id\x18\a \x01(\x04R\n" +
 	"categoryId\x125\n" +
-	"\bdue_date\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\"\x8b\x01\n" +
+	"\bdue_date\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12=\n" +
+	"\fcompleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\x8b\x01\n" +
 	"\aNewTask\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
 	"\x04note\x18\x02 \x01(\tR\x04note\x12\x1f\n" +
 	"\vcategory_id\x18\x03 \x01(\x04R\n" +
 	"categoryId\x125\n" +
-	"\bdue_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\"\x93\x02\n" +
+	"\bdue_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\"\xe8\x02\n" +
 	"\n" +
 	"UpdateTask\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x19\n" +
@@ -586,27 +611,31 @@ const file_todo_proto_rawDesc = "" +
 	"\tcompleted\x18\x04 \x01(\x05H\x02R\tcompleted\x88\x01\x01\x12$\n" +
 	"\vcategory_id\x18\x05 \x01(\x04H\x03R\n" +
 	"categoryId\x88\x01\x01\x12:\n" +
-	"\bdue_date\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampH\x04R\adueDate\x88\x01\x01B\b\n" +
+	"\bdue_date\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampH\x04R\adueDate\x88\x01\x01\x12B\n" +
+	"\fcompleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampH\x05R\vcompletedAt\x88\x01\x01B\b\n" +
 	"\x06_titleB\a\n" +
 	"\x05_noteB\f\n" +
 	"\n" +
 	"_completedB\x0e\n" +
 	"\f_category_idB\v\n" +
-	"\t_due_date\",\n" +
+	"\t_due_dateB\x0f\n" +
+	"\r_completed_at\",\n" +
 	"\bTaskList\x12 \n" +
 	"\x05tasks\x18\x01 \x03(\v2\n" +
 	".task.TaskR\x05tasks\"\x18\n" +
 	"\x06TaskId\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x04R\x02id\"\xf5\x01\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\"\xb7\x02\n" +
 	"\x0fGetTasksRequest\x12$\n" +
 	"\vcategory_id\x18\x01 \x01(\x04H\x00R\n" +
 	"categoryId\x88\x01\x01\x12E\n" +
 	"\x0edue_date_start\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\fdueDateStart\x88\x01\x01\x12A\n" +
 	"\fdue_date_end\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampH\x02R\n" +
-	"dueDateEnd\x88\x01\x01B\x0e\n" +
+	"dueDateEnd\x88\x01\x01\x12,\n" +
+	"\x0fincomplete_only\x18\x04 \x01(\bH\x03R\x0eincompleteOnly\x88\x01\x01B\x0e\n" +
 	"\f_category_idB\x11\n" +
 	"\x0f_due_date_startB\x0f\n" +
-	"\r_due_date_end\"8\n" +
+	"\r_due_date_endB\x12\n" +
+	"\x10_incomplete_only\"8\n" +
 	"\x11CreateTaskRequest\x12#\n" +
 	"\x05input\x18\x01 \x01(\v2\r.task.NewTaskR\x05input\";\n" +
 	"\x11UpdateTaskRequest\x12&\n" +
@@ -653,26 +682,28 @@ var file_todo_proto_depIdxs = []int32{
 	9,  // 0: task.Task.created_at:type_name -> google.protobuf.Timestamp
 	9,  // 1: task.Task.updated_at:type_name -> google.protobuf.Timestamp
 	9,  // 2: task.Task.due_date:type_name -> google.protobuf.Timestamp
-	9,  // 3: task.NewTask.due_date:type_name -> google.protobuf.Timestamp
-	9,  // 4: task.UpdateTask.due_date:type_name -> google.protobuf.Timestamp
-	0,  // 5: task.TaskList.tasks:type_name -> task.Task
-	9,  // 6: task.GetTasksRequest.due_date_start:type_name -> google.protobuf.Timestamp
-	9,  // 7: task.GetTasksRequest.due_date_end:type_name -> google.protobuf.Timestamp
-	1,  // 8: task.CreateTaskRequest.input:type_name -> task.NewTask
-	2,  // 9: task.UpdateTaskRequest.input:type_name -> task.UpdateTask
-	5,  // 10: task.TaskService.GetTasks:input_type -> task.GetTasksRequest
-	6,  // 11: task.TaskService.CreateTask:input_type -> task.CreateTaskRequest
-	7,  // 12: task.TaskService.UpdateTask:input_type -> task.UpdateTaskRequest
-	4,  // 13: task.TaskService.DeleteTask:input_type -> task.TaskId
-	3,  // 14: task.TaskService.GetTasks:output_type -> task.TaskList
-	0,  // 15: task.TaskService.CreateTask:output_type -> task.Task
-	0,  // 16: task.TaskService.UpdateTask:output_type -> task.Task
-	8,  // 17: task.TaskService.DeleteTask:output_type -> task.DeleteTaskResponse
-	14, // [14:18] is the sub-list for method output_type
-	10, // [10:14] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	9,  // 3: task.Task.completed_at:type_name -> google.protobuf.Timestamp
+	9,  // 4: task.NewTask.due_date:type_name -> google.protobuf.Timestamp
+	9,  // 5: task.UpdateTask.due_date:type_name -> google.protobuf.Timestamp
+	9,  // 6: task.UpdateTask.completed_at:type_name -> google.protobuf.Timestamp
+	0,  // 7: task.TaskList.tasks:type_name -> task.Task
+	9,  // 8: task.GetTasksRequest.due_date_start:type_name -> google.protobuf.Timestamp
+	9,  // 9: task.GetTasksRequest.due_date_end:type_name -> google.protobuf.Timestamp
+	1,  // 10: task.CreateTaskRequest.input:type_name -> task.NewTask
+	2,  // 11: task.UpdateTaskRequest.input:type_name -> task.UpdateTask
+	5,  // 12: task.TaskService.GetTasks:input_type -> task.GetTasksRequest
+	6,  // 13: task.TaskService.CreateTask:input_type -> task.CreateTaskRequest
+	7,  // 14: task.TaskService.UpdateTask:input_type -> task.UpdateTaskRequest
+	4,  // 15: task.TaskService.DeleteTask:input_type -> task.TaskId
+	3,  // 16: task.TaskService.GetTasks:output_type -> task.TaskList
+	0,  // 17: task.TaskService.CreateTask:output_type -> task.Task
+	0,  // 18: task.TaskService.UpdateTask:output_type -> task.Task
+	8,  // 19: task.TaskService.DeleteTask:output_type -> task.DeleteTaskResponse
+	16, // [16:20] is the sub-list for method output_type
+	12, // [12:16] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_todo_proto_init() }

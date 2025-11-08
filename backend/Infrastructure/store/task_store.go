@@ -8,6 +8,7 @@ import (
 	"backend/domain/repository"
 
 	"github.com/jinzhu/gorm"
+	"github.com/labstack/gommon/log"
 )
 
 // TaskRepository implements domain.TaskRepository using GORM.
@@ -31,6 +32,10 @@ func (r *TaskRepository) FindAll(ctx context.Context, filter repository.TaskFilt
 	}
 	if filter.DueDateTo != nil {
 		query = query.Where("due_date <= ?", filter.DueDateTo.Format("2006-01-02"))
+	}
+	log.Debugf("IncompleteOnly: %v", filter.IncompleteOnly)
+	if filter.IncompleteOnly != nil && *filter.IncompleteOnly {
+		query = query.Where("completed = ?", 0)
 	}
 
 	var taskDTOs []dto.Task
