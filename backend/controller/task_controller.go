@@ -17,17 +17,17 @@ import (
 // TaskController bridges gRPC requests with task use cases.
 type TaskController struct {
 	pb.UnimplementedTaskServiceServer
-	usecase usecase.TaskUseCase
+	usecase        usecase.TaskUseCase
+	subTaskUsecase usecase.SubTaskUseCase
 }
 
 // NewTaskController constructs a TaskController.
-func NewTaskController(uc usecase.TaskUseCase) *TaskController {
-	return &TaskController{usecase: uc}
+func NewTaskController(uc usecase.TaskUseCase, sub usecase.SubTaskUseCase) *TaskController {
+	return &TaskController{usecase: uc, subTaskUsecase: sub}
 }
 
 // GetTasks handles retrieval of all tasks with optional filtering.
 func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
-	// log.Infof("received GetTasks request")
 	filter := repository.TaskFilter{}
 	if in != nil {
 		filter.CategoryID = in.CategoryId
@@ -38,6 +38,13 @@ func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (
 	tasks, err := h.usecase.ListTasks(ctx, filter)
 	if err != nil {
 		return nil, err
+	}
+	for i := range tasks {
+		subTasks, err := h.subTaskUsecase.ListByTaskID(ctx, tasks[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		tasks[i].SubTasks = subTasks
 	}
 	pbTasks := make([]*pb.Task, 0, len(tasks))
 	for _, task := range tasks {
@@ -82,6 +89,40 @@ func (h *TaskController) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.Del
 	return &pb.DeleteTaskResponse{Success: true}, nil
 }
 
+// CreateSubTask handles creation of a sub task.
+func (h *TaskController) CreateSubTask(ctx context.Context, in *pb.CreateSubTaskRequest) (*pb.SubTask, error) {
+	subTask := toModelSubTaskFromCreateRequest(in)
+	res, err := h.subTaskUsecase.Create(ctx, subTask)
+	if err != nil {
+		return nil, err
+	}
+	return toPBSubTask(*res), nil
+}
+
+// ToggleSubTask handles toggling completion of a sub task.
+func (h *TaskController) ToggleSubTask(ctx context.Context, in *pb.ToggleSubTaskRequest) (*pb.SubTask, error) {
+	res, err := h.subTaskUsecase.ToggleCompletion(ctx, in.Id, in.Completed)
+	if err != nil {
+		return nil, err
+	}
+	return toPBSubTask(*res), nil
+}
+
+// ListSubTasks returns subtasks for a task.
+func (h *TaskController) ListSubTasks(ctx context.Context, in *pb.TaskId) (*pb.SubTaskList, error) {
+	subTasks, err := h.subTaskUsecase.ListByTaskID(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	pbSubTasks := make([]*pb.SubTask, 0, len(subTasks))
+	for _, st := range subTasks {
+		pbSubTasks = append(pbSubTasks, toPBSubTask(st))
+	}
+
+	return &pb.SubTaskList{SubTasks: pbSubTasks}, nil
+}
+
 func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {
 	return model.Task{
 		Title:      in.Input.Title,
@@ -93,6 +134,10 @@ func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {
 }
 
 func toPBTask(task model.Task) (*pb.Task, error) {
+	pbSubTasks := make([]*pb.SubTask, 0, len(task.SubTasks))
+	for _, st := range task.SubTasks {
+		pbSubTasks = append(pbSubTasks, toPBSubTask(st))
+	}
 	return &pb.Task{
 		Id:          task.ID,
 		Title:       task.Title,
@@ -103,6 +148,7 @@ func toPBTask(task model.Task) (*pb.Task, error) {
 		DueDate:     timeToTimestamp(task.DueDate),
 		CreatedAt:   timestamppb.New(task.CreatedAt),
 		UpdatedAt:   timestamppb.New(task.UpdatedAt),
+		SubTasks:    pbSubTasks,
 	}, nil
 }
 
@@ -145,4 +191,28 @@ func timeToTimestamp(t *time.Time) *timestamppb.Timestamp {
 	}
 
 	return timestamppb.New(*t)
+}
+
+func toModelSubTaskFromCreateRequest(in *pb.CreateSubTaskRequest) model.SubTask {
+	return model.SubTask{
+		TaskID:    in.Input.TaskId,
+		Title:     in.Input.Title,
+		Note:      in.Input.Note,
+		DueDate:   timestampToTime(in.Input.DueDate),
+		Completed: 0,
+	}
+}
+
+func toPBSubTask(sub model.SubTask) *pb.SubTask {
+	return &pb.SubTask{
+		Id:          sub.ID,
+		TaskId:      sub.TaskID,
+		Title:       sub.Title,
+		Note:        sub.Note,
+		Completed:   sub.Completed,
+		CompletedAt: timeToTimestamp(sub.CompletedAt),
+		DueDate:     timeToTimestamp(sub.DueDate),
+		CreatedAt:   timestamppb.New(sub.CreatedAt),
+		UpdatedAt:   timestamppb.New(sub.UpdatedAt),
+	}
 }

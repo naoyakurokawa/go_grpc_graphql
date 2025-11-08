@@ -58,3 +58,21 @@ func (c *TodoController) ListTasks(ctx context.Context, filter repository.TaskFi
 
 	return tasks, nil
 }
+
+func (c *TodoController) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	subTask, err := c.usecase.CreateSubTask(ctx, input)
+	if err != nil {
+		log.Printf("failed to create sub task: %v", err)
+		return nil, err
+	}
+	return subTask, nil
+}
+
+func (c *TodoController) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	subTask, err := c.usecase.ToggleSubTask(ctx, id, completed)
+	if err != nil {
+		log.Printf("failed to toggle sub task: %v", err)
+		return nil, err
+	}
+	return subTask, nil
+}

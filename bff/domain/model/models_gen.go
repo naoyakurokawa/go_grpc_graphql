@@ -10,6 +10,13 @@ type Category struct {
 type Mutation struct {
 }
 
+type NewSubTask struct {
+	TaskID  uint64  `json:"task_id"`
+	Title   string  `json:"title"`
+	Note    string  `json:"note"`
+	DueDate *string `json:"due_date,omitempty"`
+}
+
 type NewTask struct {
 	Title      string  `json:"title"`
 	Note       string  `json:"note"`
@@ -20,16 +27,29 @@ type NewTask struct {
 type Query struct {
 }
 
-type Task struct {
+type SubTask struct {
 	ID          uint64  `json:"id"`
+	TaskID      uint64  `json:"task_id"`
 	Title       string  `json:"title"`
 	Note        string  `json:"note"`
-	CategoryID  *uint64 `json:"category_id,omitempty"`
-	DueDate     *string `json:"due_date,omitempty"`
 	Completed   int32   `json:"completed"`
 	CompletedAt *string `json:"completed_at,omitempty"`
+	DueDate     *string `json:"due_date,omitempty"`
 	CreatedAt   string  `json:"created_at"`
 	UpdatedAt   string  `json:"updated_at"`
+}
+
+type Task struct {
+	ID          uint64     `json:"id"`
+	Title       string     `json:"title"`
+	Note        string     `json:"note"`
+	CategoryID  *uint64    `json:"category_id,omitempty"`
+	DueDate     *string    `json:"due_date,omitempty"`
+	Completed   int32      `json:"completed"`
+	CompletedAt *string    `json:"completed_at,omitempty"`
+	CreatedAt   string     `json:"created_at"`
+	UpdatedAt   string     `json:"updated_at"`
+	SubTasks    []*SubTask `json:"sub_tasks"`
 }
 
 type UpdateTask struct {

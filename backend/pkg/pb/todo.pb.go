@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v3.21.12
-// source: todo.proto
+// source: grpc/proto/todo.proto
 
 package pb
 
@@ -33,13 +33,14 @@ type Task struct {
 	CategoryId    uint64                 `protobuf:"varint,7,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
 	DueDate       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
 	CompletedAt   *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	SubTasks      []*SubTask             `protobuf:"bytes,10,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Task) Reset() {
 	*x = Task{}
-	mi := &file_todo_proto_msgTypes[0]
+	mi := &file_grpc_proto_todo_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +52,7 @@ func (x *Task) String() string {
 func (*Task) ProtoMessage() {}
 
 func (x *Task) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[0]
+	mi := &file_grpc_proto_todo_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +65,7 @@ func (x *Task) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Task.ProtoReflect.Descriptor instead.
 func (*Task) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{0}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Task) GetId() uint64 {
@@ -130,6 +131,13 @@ func (x *Task) GetCompletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Task) GetSubTasks() []*SubTask {
+	if x != nil {
+		return x.SubTasks
+	}
+	return nil
+}
+
 type NewTask struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -142,7 +150,7 @@ type NewTask struct {
 
 func (x *NewTask) Reset() {
 	*x = NewTask{}
-	mi := &file_todo_proto_msgTypes[1]
+	mi := &file_grpc_proto_todo_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +162,7 @@ func (x *NewTask) String() string {
 func (*NewTask) ProtoMessage() {}
 
 func (x *NewTask) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[1]
+	mi := &file_grpc_proto_todo_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -167,7 +175,7 @@ func (x *NewTask) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NewTask.ProtoReflect.Descriptor instead.
 func (*NewTask) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{1}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *NewTask) GetTitle() string {
@@ -213,7 +221,7 @@ type UpdateTask struct {
 
 func (x *UpdateTask) Reset() {
 	*x = UpdateTask{}
-	mi := &file_todo_proto_msgTypes[2]
+	mi := &file_grpc_proto_todo_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -225,7 +233,7 @@ func (x *UpdateTask) String() string {
 func (*UpdateTask) ProtoMessage() {}
 
 func (x *UpdateTask) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[2]
+	mi := &file_grpc_proto_todo_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,7 +246,7 @@ func (x *UpdateTask) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTask.ProtoReflect.Descriptor instead.
 func (*UpdateTask) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{2}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdateTask) GetId() uint64 {
@@ -299,7 +307,7 @@ type TaskList struct {
 
 func (x *TaskList) Reset() {
 	*x = TaskList{}
-	mi := &file_todo_proto_msgTypes[3]
+	mi := &file_grpc_proto_todo_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -311,7 +319,7 @@ func (x *TaskList) String() string {
 func (*TaskList) ProtoMessage() {}
 
 func (x *TaskList) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[3]
+	mi := &file_grpc_proto_todo_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -324,12 +332,284 @@ func (x *TaskList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskList.ProtoReflect.Descriptor instead.
 func (*TaskList) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{3}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *TaskList) GetTasks() []*Task {
 	if x != nil {
 		return x.Tasks
+	}
+	return nil
+}
+
+type SubTask struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TaskId        uint64                 `protobuf:"varint,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Note          string                 `protobuf:"bytes,4,opt,name=note,proto3" json:"note,omitempty"`
+	Completed     int32                  `protobuf:"varint,5,opt,name=completed,proto3" json:"completed,omitempty"`
+	CompletedAt   *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	DueDate       *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubTask) Reset() {
+	*x = SubTask{}
+	mi := &file_grpc_proto_todo_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubTask) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubTask) ProtoMessage() {}
+
+func (x *SubTask) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_todo_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubTask.ProtoReflect.Descriptor instead.
+func (*SubTask) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SubTask) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *SubTask) GetTaskId() uint64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *SubTask) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SubTask) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *SubTask) GetCompleted() int32 {
+	if x != nil {
+		return x.Completed
+	}
+	return 0
+}
+
+func (x *SubTask) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
+func (x *SubTask) GetDueDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DueDate
+	}
+	return nil
+}
+
+func (x *SubTask) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *SubTask) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type NewSubTask struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        uint64                 `protobuf:"varint,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Note          string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
+	DueDate       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=due_date,json=dueDate,proto3" json:"due_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NewSubTask) Reset() {
+	*x = NewSubTask{}
+	mi := &file_grpc_proto_todo_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NewSubTask) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NewSubTask) ProtoMessage() {}
+
+func (x *NewSubTask) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_todo_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NewSubTask.ProtoReflect.Descriptor instead.
+func (*NewSubTask) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *NewSubTask) GetTaskId() uint64 {
+	if x != nil {
+		return x.TaskId
+	}
+	return 0
+}
+
+func (x *NewSubTask) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *NewSubTask) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *NewSubTask) GetDueDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DueDate
+	}
+	return nil
+}
+
+type ToggleSubTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Completed     bool                   `protobuf:"varint,2,opt,name=completed,proto3" json:"completed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleSubTaskRequest) Reset() {
+	*x = ToggleSubTaskRequest{}
+	mi := &file_grpc_proto_todo_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleSubTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleSubTaskRequest) ProtoMessage() {}
+
+func (x *ToggleSubTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_todo_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleSubTaskRequest.ProtoReflect.Descriptor instead.
+func (*ToggleSubTaskRequest) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ToggleSubTaskRequest) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ToggleSubTaskRequest) GetCompleted() bool {
+	if x != nil {
+		return x.Completed
+	}
+	return false
+}
+
+type SubTaskList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SubTasks      []*SubTask             `protobuf:"bytes,1,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubTaskList) Reset() {
+	*x = SubTaskList{}
+	mi := &file_grpc_proto_todo_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubTaskList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubTaskList) ProtoMessage() {}
+
+func (x *SubTaskList) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_todo_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubTaskList.ProtoReflect.Descriptor instead.
+func (*SubTaskList) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *SubTaskList) GetSubTasks() []*SubTask {
+	if x != nil {
+		return x.SubTasks
 	}
 	return nil
 }
@@ -343,7 +623,7 @@ type TaskId struct {
 
 func (x *TaskId) Reset() {
 	*x = TaskId{}
-	mi := &file_todo_proto_msgTypes[4]
+	mi := &file_grpc_proto_todo_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -355,7 +635,7 @@ func (x *TaskId) String() string {
 func (*TaskId) ProtoMessage() {}
 
 func (x *TaskId) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[4]
+	mi := &file_grpc_proto_todo_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,7 +648,7 @@ func (x *TaskId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskId.ProtoReflect.Descriptor instead.
 func (*TaskId) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{4}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TaskId) GetId() uint64 {
@@ -390,7 +670,7 @@ type GetTasksRequest struct {
 
 func (x *GetTasksRequest) Reset() {
 	*x = GetTasksRequest{}
-	mi := &file_todo_proto_msgTypes[5]
+	mi := &file_grpc_proto_todo_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -402,7 +682,7 @@ func (x *GetTasksRequest) String() string {
 func (*GetTasksRequest) ProtoMessage() {}
 
 func (x *GetTasksRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[5]
+	mi := &file_grpc_proto_todo_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -415,7 +695,7 @@ func (x *GetTasksRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTasksRequest.ProtoReflect.Descriptor instead.
 func (*GetTasksRequest) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{5}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetTasksRequest) GetCategoryId() uint64 {
@@ -455,7 +735,7 @@ type CreateTaskRequest struct {
 
 func (x *CreateTaskRequest) Reset() {
 	*x = CreateTaskRequest{}
-	mi := &file_todo_proto_msgTypes[6]
+	mi := &file_grpc_proto_todo_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +747,7 @@ func (x *CreateTaskRequest) String() string {
 func (*CreateTaskRequest) ProtoMessage() {}
 
 func (x *CreateTaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[6]
+	mi := &file_grpc_proto_todo_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -480,7 +760,7 @@ func (x *CreateTaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTaskRequest.ProtoReflect.Descriptor instead.
 func (*CreateTaskRequest) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{6}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateTaskRequest) GetInput() *NewTask {
@@ -499,7 +779,7 @@ type UpdateTaskRequest struct {
 
 func (x *UpdateTaskRequest) Reset() {
 	*x = UpdateTaskRequest{}
-	mi := &file_todo_proto_msgTypes[7]
+	mi := &file_grpc_proto_todo_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -511,7 +791,7 @@ func (x *UpdateTaskRequest) String() string {
 func (*UpdateTaskRequest) ProtoMessage() {}
 
 func (x *UpdateTaskRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[7]
+	mi := &file_grpc_proto_todo_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -524,7 +804,7 @@ func (x *UpdateTaskRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTaskRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTaskRequest) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{7}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateTaskRequest) GetInput() *UpdateTask {
@@ -543,7 +823,7 @@ type DeleteTaskResponse struct {
 
 func (x *DeleteTaskResponse) Reset() {
 	*x = DeleteTaskResponse{}
-	mi := &file_todo_proto_msgTypes[8]
+	mi := &file_grpc_proto_todo_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -555,7 +835,7 @@ func (x *DeleteTaskResponse) String() string {
 func (*DeleteTaskResponse) ProtoMessage() {}
 
 func (x *DeleteTaskResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_todo_proto_msgTypes[8]
+	mi := &file_grpc_proto_todo_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -568,7 +848,7 @@ func (x *DeleteTaskResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTaskResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTaskResponse) Descriptor() ([]byte, []int) {
-	return file_todo_proto_rawDescGZIP(), []int{8}
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteTaskResponse) GetSuccess() bool {
@@ -578,12 +858,55 @@ func (x *DeleteTaskResponse) GetSuccess() bool {
 	return false
 }
 
-var File_todo_proto protoreflect.FileDescriptor
+type CreateSubTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Input         *NewSubTask            `protobuf:"bytes,1,opt,name=input,proto3" json:"input,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_todo_proto_rawDesc = "" +
+func (x *CreateSubTaskRequest) Reset() {
+	*x = CreateSubTaskRequest{}
+	mi := &file_grpc_proto_todo_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSubTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSubTaskRequest) ProtoMessage() {}
+
+func (x *CreateSubTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_grpc_proto_todo_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSubTaskRequest.ProtoReflect.Descriptor instead.
+func (*CreateSubTaskRequest) Descriptor() ([]byte, []int) {
+	return file_grpc_proto_todo_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CreateSubTaskRequest) GetInput() *NewSubTask {
+	if x != nil {
+		return x.Input
+	}
+	return nil
+}
+
+var File_grpc_proto_todo_proto protoreflect.FileDescriptor
+
+const file_grpc_proto_todo_proto_rawDesc = "" +
 	"\n" +
-	"\n" +
-	"todo.proto\x12\x04task\x1a\x1fgoogle/protobuf/timestamp.proto\"\xeb\x02\n" +
+	"\x15grpc/proto/todo.proto\x12\x04task\x1a\x1fgoogle/protobuf/timestamp.proto\"\x97\x03\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -596,7 +919,9 @@ const file_todo_proto_rawDesc = "" +
 	"\vcategory_id\x18\a \x01(\x04R\n" +
 	"categoryId\x125\n" +
 	"\bdue_date\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x12=\n" +
-	"\fcompleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\x8b\x01\n" +
+	"\fcompleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x12*\n" +
+	"\tsub_tasks\x18\n" +
+	" \x03(\v2\r.task.SubTaskR\bsubTasks\"\x8b\x01\n" +
 	"\aNewTask\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
 	"\x04note\x18\x02 \x01(\tR\x04note\x12\x1f\n" +
@@ -622,7 +947,30 @@ const file_todo_proto_rawDesc = "" +
 	"\r_completed_at\",\n" +
 	"\bTaskList\x12 \n" +
 	"\x05tasks\x18\x01 \x03(\v2\n" +
-	".task.TaskR\x05tasks\"\x18\n" +
+	".task.TaskR\x05tasks\"\xe6\x02\n" +
+	"\aSubTask\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x17\n" +
+	"\atask_id\x18\x02 \x01(\x04R\x06taskId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x12\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12\x1c\n" +
+	"\tcompleted\x18\x05 \x01(\x05R\tcompleted\x12=\n" +
+	"\fcompleted_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x125\n" +
+	"\bdue_date\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x86\x01\n" +
+	"\n" +
+	"NewSubTask\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\x04R\x06taskId\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
+	"\x04note\x18\x03 \x01(\tR\x04note\x125\n" +
+	"\bdue_date\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\adueDate\"D\n" +
+	"\x14ToggleSubTaskRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x1c\n" +
+	"\tcompleted\x18\x02 \x01(\bR\tcompleted\"9\n" +
+	"\vSubTaskList\x12*\n" +
+	"\tsub_tasks\x18\x01 \x03(\v2\r.task.SubTaskR\bsubTasks\"\x18\n" +
 	"\x06TaskId\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\"\xb7\x02\n" +
 	"\x0fGetTasksRequest\x12$\n" +
@@ -641,7 +989,9 @@ const file_todo_proto_rawDesc = "" +
 	"\x11UpdateTaskRequest\x12&\n" +
 	"\x05input\x18\x01 \x01(\v2\x10.task.UpdateTaskR\x05input\".\n" +
 	"\x12DeleteTaskResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xdc\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\">\n" +
+	"\x14CreateSubTaskRequest\x12&\n" +
+	"\x05input\x18\x01 \x01(\v2\x10.task.NewSubTaskR\x05input2\x85\x03\n" +
 	"\vTaskService\x121\n" +
 	"\bGetTasks\x12\x15.task.GetTasksRequest\x1a\x0e.task.TaskList\x121\n" +
 	"\n" +
@@ -651,83 +1001,105 @@ const file_todo_proto_rawDesc = "" +
 	"UpdateTask\x12\x17.task.UpdateTaskRequest\x1a\n" +
 	".task.Task\x124\n" +
 	"\n" +
-	"DeleteTask\x12\f.task.TaskId\x1a\x18.task.DeleteTaskResponseB\x05Z\x03/pbb\x06proto3"
+	"DeleteTask\x12\f.task.TaskId\x1a\x18.task.DeleteTaskResponse\x12:\n" +
+	"\rCreateSubTask\x12\x1a.task.CreateSubTaskRequest\x1a\r.task.SubTask\x12:\n" +
+	"\rToggleSubTask\x12\x1a.task.ToggleSubTaskRequest\x1a\r.task.SubTask\x12/\n" +
+	"\fListSubTasks\x12\f.task.TaskId\x1a\x11.task.SubTaskListB\x05Z\x03/pbb\x06proto3"
 
 var (
-	file_todo_proto_rawDescOnce sync.Once
-	file_todo_proto_rawDescData []byte
+	file_grpc_proto_todo_proto_rawDescOnce sync.Once
+	file_grpc_proto_todo_proto_rawDescData []byte
 )
 
-func file_todo_proto_rawDescGZIP() []byte {
-	file_todo_proto_rawDescOnce.Do(func() {
-		file_todo_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_todo_proto_rawDesc), len(file_todo_proto_rawDesc)))
+func file_grpc_proto_todo_proto_rawDescGZIP() []byte {
+	file_grpc_proto_todo_proto_rawDescOnce.Do(func() {
+		file_grpc_proto_todo_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_grpc_proto_todo_proto_rawDesc), len(file_grpc_proto_todo_proto_rawDesc)))
 	})
-	return file_todo_proto_rawDescData
+	return file_grpc_proto_todo_proto_rawDescData
 }
 
-var file_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_todo_proto_goTypes = []any{
+var file_grpc_proto_todo_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_grpc_proto_todo_proto_goTypes = []any{
 	(*Task)(nil),                  // 0: task.Task
 	(*NewTask)(nil),               // 1: task.NewTask
 	(*UpdateTask)(nil),            // 2: task.UpdateTask
 	(*TaskList)(nil),              // 3: task.TaskList
-	(*TaskId)(nil),                // 4: task.TaskId
-	(*GetTasksRequest)(nil),       // 5: task.GetTasksRequest
-	(*CreateTaskRequest)(nil),     // 6: task.CreateTaskRequest
-	(*UpdateTaskRequest)(nil),     // 7: task.UpdateTaskRequest
-	(*DeleteTaskResponse)(nil),    // 8: task.DeleteTaskResponse
-	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*SubTask)(nil),               // 4: task.SubTask
+	(*NewSubTask)(nil),            // 5: task.NewSubTask
+	(*ToggleSubTaskRequest)(nil),  // 6: task.ToggleSubTaskRequest
+	(*SubTaskList)(nil),           // 7: task.SubTaskList
+	(*TaskId)(nil),                // 8: task.TaskId
+	(*GetTasksRequest)(nil),       // 9: task.GetTasksRequest
+	(*CreateTaskRequest)(nil),     // 10: task.CreateTaskRequest
+	(*UpdateTaskRequest)(nil),     // 11: task.UpdateTaskRequest
+	(*DeleteTaskResponse)(nil),    // 12: task.DeleteTaskResponse
+	(*CreateSubTaskRequest)(nil),  // 13: task.CreateSubTaskRequest
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
-var file_todo_proto_depIdxs = []int32{
-	9,  // 0: task.Task.created_at:type_name -> google.protobuf.Timestamp
-	9,  // 1: task.Task.updated_at:type_name -> google.protobuf.Timestamp
-	9,  // 2: task.Task.due_date:type_name -> google.protobuf.Timestamp
-	9,  // 3: task.Task.completed_at:type_name -> google.protobuf.Timestamp
-	9,  // 4: task.NewTask.due_date:type_name -> google.protobuf.Timestamp
-	9,  // 5: task.UpdateTask.due_date:type_name -> google.protobuf.Timestamp
-	9,  // 6: task.UpdateTask.completed_at:type_name -> google.protobuf.Timestamp
-	0,  // 7: task.TaskList.tasks:type_name -> task.Task
-	9,  // 8: task.GetTasksRequest.due_date_start:type_name -> google.protobuf.Timestamp
-	9,  // 9: task.GetTasksRequest.due_date_end:type_name -> google.protobuf.Timestamp
-	1,  // 10: task.CreateTaskRequest.input:type_name -> task.NewTask
-	2,  // 11: task.UpdateTaskRequest.input:type_name -> task.UpdateTask
-	5,  // 12: task.TaskService.GetTasks:input_type -> task.GetTasksRequest
-	6,  // 13: task.TaskService.CreateTask:input_type -> task.CreateTaskRequest
-	7,  // 14: task.TaskService.UpdateTask:input_type -> task.UpdateTaskRequest
-	4,  // 15: task.TaskService.DeleteTask:input_type -> task.TaskId
-	3,  // 16: task.TaskService.GetTasks:output_type -> task.TaskList
-	0,  // 17: task.TaskService.CreateTask:output_type -> task.Task
-	0,  // 18: task.TaskService.UpdateTask:output_type -> task.Task
-	8,  // 19: task.TaskService.DeleteTask:output_type -> task.DeleteTaskResponse
-	16, // [16:20] is the sub-list for method output_type
-	12, // [12:16] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+var file_grpc_proto_todo_proto_depIdxs = []int32{
+	14, // 0: task.Task.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: task.Task.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 2: task.Task.due_date:type_name -> google.protobuf.Timestamp
+	14, // 3: task.Task.completed_at:type_name -> google.protobuf.Timestamp
+	4,  // 4: task.Task.sub_tasks:type_name -> task.SubTask
+	14, // 5: task.NewTask.due_date:type_name -> google.protobuf.Timestamp
+	14, // 6: task.UpdateTask.due_date:type_name -> google.protobuf.Timestamp
+	14, // 7: task.UpdateTask.completed_at:type_name -> google.protobuf.Timestamp
+	0,  // 8: task.TaskList.tasks:type_name -> task.Task
+	14, // 9: task.SubTask.completed_at:type_name -> google.protobuf.Timestamp
+	14, // 10: task.SubTask.due_date:type_name -> google.protobuf.Timestamp
+	14, // 11: task.SubTask.created_at:type_name -> google.protobuf.Timestamp
+	14, // 12: task.SubTask.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 13: task.NewSubTask.due_date:type_name -> google.protobuf.Timestamp
+	4,  // 14: task.SubTaskList.sub_tasks:type_name -> task.SubTask
+	14, // 15: task.GetTasksRequest.due_date_start:type_name -> google.protobuf.Timestamp
+	14, // 16: task.GetTasksRequest.due_date_end:type_name -> google.protobuf.Timestamp
+	1,  // 17: task.CreateTaskRequest.input:type_name -> task.NewTask
+	2,  // 18: task.UpdateTaskRequest.input:type_name -> task.UpdateTask
+	5,  // 19: task.CreateSubTaskRequest.input:type_name -> task.NewSubTask
+	9,  // 20: task.TaskService.GetTasks:input_type -> task.GetTasksRequest
+	10, // 21: task.TaskService.CreateTask:input_type -> task.CreateTaskRequest
+	11, // 22: task.TaskService.UpdateTask:input_type -> task.UpdateTaskRequest
+	8,  // 23: task.TaskService.DeleteTask:input_type -> task.TaskId
+	13, // 24: task.TaskService.CreateSubTask:input_type -> task.CreateSubTaskRequest
+	6,  // 25: task.TaskService.ToggleSubTask:input_type -> task.ToggleSubTaskRequest
+	8,  // 26: task.TaskService.ListSubTasks:input_type -> task.TaskId
+	3,  // 27: task.TaskService.GetTasks:output_type -> task.TaskList
+	0,  // 28: task.TaskService.CreateTask:output_type -> task.Task
+	0,  // 29: task.TaskService.UpdateTask:output_type -> task.Task
+	12, // 30: task.TaskService.DeleteTask:output_type -> task.DeleteTaskResponse
+	4,  // 31: task.TaskService.CreateSubTask:output_type -> task.SubTask
+	4,  // 32: task.TaskService.ToggleSubTask:output_type -> task.SubTask
+	7,  // 33: task.TaskService.ListSubTasks:output_type -> task.SubTaskList
+	27, // [27:34] is the sub-list for method output_type
+	20, // [20:27] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
-func init() { file_todo_proto_init() }
-func file_todo_proto_init() {
-	if File_todo_proto != nil {
+func init() { file_grpc_proto_todo_proto_init() }
+func file_grpc_proto_todo_proto_init() {
+	if File_grpc_proto_todo_proto != nil {
 		return
 	}
-	file_todo_proto_msgTypes[2].OneofWrappers = []any{}
-	file_todo_proto_msgTypes[5].OneofWrappers = []any{}
+	file_grpc_proto_todo_proto_msgTypes[2].OneofWrappers = []any{}
+	file_grpc_proto_todo_proto_msgTypes[9].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_todo_proto_rawDesc), len(file_todo_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grpc_proto_todo_proto_rawDesc), len(file_grpc_proto_todo_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_todo_proto_goTypes,
-		DependencyIndexes: file_todo_proto_depIdxs,
-		MessageInfos:      file_todo_proto_msgTypes,
+		GoTypes:           file_grpc_proto_todo_proto_goTypes,
+		DependencyIndexes: file_grpc_proto_todo_proto_depIdxs,
+		MessageInfos:      file_grpc_proto_todo_proto_msgTypes,
 	}.Build()
-	File_todo_proto = out.File
-	file_todo_proto_goTypes = nil
-	file_todo_proto_depIdxs = nil
+	File_grpc_proto_todo_proto = out.File
+	file_grpc_proto_todo_proto_goTypes = nil
+	file_grpc_proto_todo_proto_depIdxs = nil
 }

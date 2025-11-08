@@ -137,6 +137,11 @@ func toDomainTask(task *pb.Task) *model.Task {
 		return nil
 	}
 
+	subTasks := make([]*model.SubTask, 0, len(task.GetSubTasks()))
+	for _, st := range task.GetSubTasks() {
+		subTasks = append(subTasks, toDomainSubTask(st))
+	}
+
 	return &model.Task{
 		ID:          task.GetId(),
 		Title:       task.GetTitle(),
@@ -147,7 +152,47 @@ func toDomainTask(task *pb.Task) *model.Task {
 		CompletedAt: formatTimestampPtr(task.GetCompletedAt()),
 		CreatedAt:   formatTimestamp(task.GetCreatedAt()),
 		UpdatedAt:   formatTimestamp(task.GetUpdatedAt()),
+		SubTasks:    subTasks,
 	}
+}
+
+func (s *TodoStore) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	req := &pb.CreateSubTaskRequest{
+		Input: &pb.NewSubTask{
+			TaskId: input.TaskID,
+			Title:  input.Title,
+			Note:   input.Note,
+		},
+	}
+
+	if input.DueDate != nil {
+		ts, err := parseDateString(input.DueDate)
+		if err != nil {
+			return nil, err
+		}
+		req.Input.DueDate = ts
+	}
+
+	res, err := s.client.CreateSubTask(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDomainSubTask(res), nil
+}
+
+func (s *TodoStore) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	req := &pb.ToggleSubTaskRequest{
+		Id:        id,
+		Completed: completed,
+	}
+
+	res, err := s.client.ToggleSubTask(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return toDomainSubTask(res), nil
 }
 
 func toUint64Ptr(v uint64) *uint64 {
@@ -202,4 +247,22 @@ func parseDateString(value *string) (*timestamppb.Timestamp, error) {
 	}
 
 	return timestamppb.New(parsed), nil
+}
+
+func toDomainSubTask(sub *pb.SubTask) *model.SubTask {
+	if sub == nil {
+		return nil
+	}
+
+	return &model.SubTask{
+		ID:          sub.GetId(),
+		TaskID:      sub.GetTaskId(),
+		Title:       sub.GetTitle(),
+		Note:        sub.GetNote(),
+		Completed:   sub.GetCompleted(),
+		CompletedAt: formatTimestampPtr(sub.GetCompletedAt()),
+		DueDate:     formatDate(sub.GetDueDate()),
+		CreatedAt:   formatTimestamp(sub.GetCreatedAt()),
+		UpdatedAt:   formatTimestamp(sub.GetUpdatedAt()),
+	}
 }

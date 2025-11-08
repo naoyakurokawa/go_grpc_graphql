@@ -12,12 +12,14 @@ type TodoRepository interface {
 	UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error)
 	DeleteTask(ctx context.Context, id uint64) (bool, error)
 	ListTasks(ctx context.Context, filter TaskFilter) ([]*model.Task, error)
+	CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error)
+	ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error)
 }
 
 // TaskFilter represents query params for task listing.
 type TaskFilter struct {
-	CategoryID   *uint64
-	DueDateStart *string
-	DueDateEnd   *string
+	CategoryID     *uint64
+	DueDateStart   *string
+	DueDateEnd     *string
 	IncompleteOnly bool
 }

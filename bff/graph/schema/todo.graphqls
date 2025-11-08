@@ -19,12 +19,27 @@ type Task {
   completed_at: String
   created_at: String!
   updated_at: String!
+  sub_tasks: [SubTask!]!
+}
+
+type SubTask {
+  id: Uint64!
+  task_id: Uint64!
+  title: String!
+  note: String!
+  completed: Int!
+  completed_at: String
+  due_date: String
+  created_at: String!
+  updated_at: String!
 }
 
 type Mutation {
   createTask(input: NewTask!): Task!
   updateTask(input: UpdateTask!): Task!
   deleteTask(id: Uint64!): Boolean!
+  createSubTask(input: NewSubTask!): SubTask!
+  toggleSubTask(id: Uint64!, completed: Boolean!): SubTask!
 }
 
 input NewTask {
@@ -41,4 +56,11 @@ input UpdateTask {
   category_id: Uint64
   due_date: String
   completed: Int
+}
+
+input NewSubTask {
+  task_id: Uint64!
+  title: String!
+  note: String!
+  due_date: String
 }

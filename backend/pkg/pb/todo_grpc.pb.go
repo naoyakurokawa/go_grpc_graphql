@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.21.12
-// source: todo.proto
+// source: grpc/proto/todo.proto
 
 package pb
 
@@ -19,10 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TaskService_GetTasks_FullMethodName   = "/task.TaskService/GetTasks"
-	TaskService_CreateTask_FullMethodName = "/task.TaskService/CreateTask"
-	TaskService_UpdateTask_FullMethodName = "/task.TaskService/UpdateTask"
-	TaskService_DeleteTask_FullMethodName = "/task.TaskService/DeleteTask"
+	TaskService_GetTasks_FullMethodName      = "/task.TaskService/GetTasks"
+	TaskService_CreateTask_FullMethodName    = "/task.TaskService/CreateTask"
+	TaskService_UpdateTask_FullMethodName    = "/task.TaskService/UpdateTask"
+	TaskService_DeleteTask_FullMethodName    = "/task.TaskService/DeleteTask"
+	TaskService_CreateSubTask_FullMethodName = "/task.TaskService/CreateSubTask"
+	TaskService_ToggleSubTask_FullMethodName = "/task.TaskService/ToggleSubTask"
+	TaskService_ListSubTasks_FullMethodName  = "/task.TaskService/ListSubTasks"
 )
 
 // TaskServiceClient is the client API for TaskService service.
@@ -33,6 +36,9 @@ type TaskServiceClient interface {
 	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*Task, error)
 	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*Task, error)
 	DeleteTask(ctx context.Context, in *TaskId, opts ...grpc.CallOption) (*DeleteTaskResponse, error)
+	CreateSubTask(ctx context.Context, in *CreateSubTaskRequest, opts ...grpc.CallOption) (*SubTask, error)
+	ToggleSubTask(ctx context.Context, in *ToggleSubTaskRequest, opts ...grpc.CallOption) (*SubTask, error)
+	ListSubTasks(ctx context.Context, in *TaskId, opts ...grpc.CallOption) (*SubTaskList, error)
 }
 
 type taskServiceClient struct {
@@ -83,6 +89,36 @@ func (c *taskServiceClient) DeleteTask(ctx context.Context, in *TaskId, opts ...
 	return out, nil
 }
 
+func (c *taskServiceClient) CreateSubTask(ctx context.Context, in *CreateSubTaskRequest, opts ...grpc.CallOption) (*SubTask, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubTask)
+	err := c.cc.Invoke(ctx, TaskService_CreateSubTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ToggleSubTask(ctx context.Context, in *ToggleSubTaskRequest, opts ...grpc.CallOption) (*SubTask, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubTask)
+	err := c.cc.Invoke(ctx, TaskService_ToggleSubTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListSubTasks(ctx context.Context, in *TaskId, opts ...grpc.CallOption) (*SubTaskList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SubTaskList)
+	err := c.cc.Invoke(ctx, TaskService_ListSubTasks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility.
@@ -91,6 +127,9 @@ type TaskServiceServer interface {
 	CreateTask(context.Context, *CreateTaskRequest) (*Task, error)
 	UpdateTask(context.Context, *UpdateTaskRequest) (*Task, error)
 	DeleteTask(context.Context, *TaskId) (*DeleteTaskResponse, error)
+	CreateSubTask(context.Context, *CreateSubTaskRequest) (*SubTask, error)
+	ToggleSubTask(context.Context, *ToggleSubTaskRequest) (*SubTask, error)
+	ListSubTasks(context.Context, *TaskId) (*SubTaskList, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -112,6 +151,15 @@ func (UnimplementedTaskServiceServer) UpdateTask(context.Context, *UpdateTaskReq
 }
 func (UnimplementedTaskServiceServer) DeleteTask(context.Context, *TaskId) (*DeleteTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTask not implemented")
+}
+func (UnimplementedTaskServiceServer) CreateSubTask(context.Context, *CreateSubTaskRequest) (*SubTask, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSubTask not implemented")
+}
+func (UnimplementedTaskServiceServer) ToggleSubTask(context.Context, *ToggleSubTaskRequest) (*SubTask, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleSubTask not implemented")
+}
+func (UnimplementedTaskServiceServer) ListSubTasks(context.Context, *TaskId) (*SubTaskList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubTasks not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
 func (UnimplementedTaskServiceServer) testEmbeddedByValue()                     {}
@@ -206,6 +254,60 @@ func _TaskService_DeleteTask_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_CreateSubTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSubTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).CreateSubTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_CreateSubTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).CreateSubTask(ctx, req.(*CreateSubTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ToggleSubTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleSubTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ToggleSubTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ToggleSubTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ToggleSubTask(ctx, req.(*ToggleSubTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListSubTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListSubTasks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListSubTasks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListSubTasks(ctx, req.(*TaskId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,7 +331,19 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "DeleteTask",
 			Handler:    _TaskService_DeleteTask_Handler,
 		},
+		{
+			MethodName: "CreateSubTask",
+			Handler:    _TaskService_CreateSubTask_Handler,
+		},
+		{
+			MethodName: "ToggleSubTask",
+			Handler:    _TaskService_ToggleSubTask_Handler,
+		},
+		{
+			MethodName: "ListSubTasks",
+			Handler:    _TaskService_ListSubTasks_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "todo.proto",
+	Metadata: "grpc/proto/todo.proto",
 }

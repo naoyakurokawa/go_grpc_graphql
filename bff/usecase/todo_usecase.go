@@ -13,6 +13,8 @@ type TodoUsecase interface {
 	UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error)
 	DeleteTask(ctx context.Context, id uint64) (bool, error)
 	ListTasks(ctx context.Context, filter repository.TaskFilter) ([]*model.Task, error)
+	CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error)
+	ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error)
 }
 
 type todoUsecase struct {
@@ -38,4 +40,12 @@ func (uc *todoUsecase) DeleteTask(ctx context.Context, id uint64) (bool, error) 
 
 func (uc *todoUsecase) ListTasks(ctx context.Context, filter repository.TaskFilter) ([]*model.Task, error) {
 	return uc.repo.ListTasks(ctx, filter)
+}
+
+func (uc *todoUsecase) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	return uc.repo.CreateSubTask(ctx, input)
+}
+
+func (uc *todoUsecase) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	return uc.repo.ToggleSubTask(ctx, id, completed)
 }

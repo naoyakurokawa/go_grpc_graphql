@@ -18,6 +18,11 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 	return r.TodoController.CreateTask(ctx, input)
 }
 
+// CreateSubTask is the resolver for the createSubTask field.
+func (r *mutationResolver) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	return r.TodoController.CreateSubTask(ctx, input)
+}
+
 // UpdateTask is the resolver for the updateTask field.
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
 	return r.TodoController.UpdateTask(ctx, input)
@@ -26,6 +31,11 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 // DeleteTask is the resolver for the deleteTask field.
 func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, error) {
 	return r.TodoController.DeleteTask(ctx, id)
+}
+
+// ToggleSubTask is the resolver for the toggleSubTask field.
+func (r *mutationResolver) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	return r.TodoController.ToggleSubTask(ctx, id, completed)
 }
 
 // Tasks is the resolver for the tasks field.
