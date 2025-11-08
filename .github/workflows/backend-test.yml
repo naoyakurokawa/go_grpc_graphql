@@ -22,13 +22,7 @@ jobs:
         with:
           go-version: '1.22.x'
 
-      - name: Install gotip
-        run: |
-          go install golang.org/dl/gotip@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
-          gotip download
-
       - name: Backend tests
         run: |
           cd backend
-          gotip test ./...
+          go test ./...
