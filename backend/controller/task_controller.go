@@ -12,19 +12,19 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// TaskHandler bridges gRPC requests with task use cases.
-type TaskHandler struct {
+// TaskController bridges gRPC requests with task use cases.
+type TaskController struct {
 	pb.UnimplementedTaskServiceServer
 	usecase usecase.TaskUseCase
 }
 
-// NewTaskHandler constructs a TaskHandler.
-func NewTaskHandler(uc usecase.TaskUseCase) *TaskHandler {
-	return &TaskHandler{usecase: uc}
+// NewTaskController constructs a TaskController.
+func NewTaskController(uc usecase.TaskUseCase) *TaskController {
+	return &TaskController{usecase: uc}
 }
 
 // GetTasks handles retrieval of all tasks with optional filtering.
-func (h *TaskHandler) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
+func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
 	log.Infof("received GetTasks request")
 	var categoryID *uint64
 	if in != nil {
@@ -48,7 +48,7 @@ func (h *TaskHandler) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb
 }
 
 // CreateTask handles creation of a task.
-func (h *TaskHandler) CreateTask(ctx context.Context, in *pb.CreateTaskRequest) (*pb.Task, error) {
+func (h *TaskController) CreateTask(ctx context.Context, in *pb.CreateTaskRequest) (*pb.Task, error) {
 	task := toModelTaskFromCreateTaskRequest(in)
 	res, err := h.usecase.CreateTask(ctx, task)
 	if err != nil {
@@ -59,7 +59,7 @@ func (h *TaskHandler) CreateTask(ctx context.Context, in *pb.CreateTaskRequest) 
 }
 
 // UpdateTask handles updates to a task.
-func (h *TaskHandler) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) (*pb.Task, error) {
+func (h *TaskController) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) (*pb.Task, error) {
 	task, err := h.usecase.UpdateTask(ctx, toUpdateTaskRequest(in))
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (h *TaskHandler) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) 
 }
 
 // DeleteTask handles deleting a task.
-func (h *TaskHandler) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.DeleteTaskResponse, error) {
+func (h *TaskController) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.DeleteTaskResponse, error) {
 	if err := h.usecase.DeleteTask(ctx, in.Id); err != nil {
 		return &pb.DeleteTaskResponse{Success: false}, err
 	}
