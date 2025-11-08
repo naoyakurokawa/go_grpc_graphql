@@ -3,12 +3,15 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import {
+  CREATE_SUB_TASK,
   CREATE_TASK,
   DELETE_TASK,
   GET_CATEGORIES,
   GET_TASKS,
+  TOGGLE_SUB_TASK,
   UPDATE_TASK,
   Category,
+  SubTask,
   Task,
 } from "../lib/getTodos";
 
@@ -83,9 +86,20 @@ export default function Home() {
     awaitRefetchQueries: true,
   });
 
+  const [createSubTaskMutation] = useMutation(CREATE_SUB_TASK, {
+    refetchQueries: taskRefetchQueries,
+    awaitRefetchQueries: true,
+  });
+
+  const [toggleSubTaskMutation] = useMutation(TOGGLE_SUB_TASK, {
+    refetchQueries: taskRefetchQueries,
+    awaitRefetchQueries: true,
+  });
+
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [togglingSubTaskId, setTogglingSubTaskId] = useState<number | null>(null);
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -222,6 +236,56 @@ export default function Home() {
 
   const tasks = data?.tasks ?? [];
 
+  const handleCreateSubTask = async (
+    event: FormEvent<HTMLFormElement>,
+    taskId: number,
+  ) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = (formData.get("title") as string | null)?.trim();
+    const note = (formData.get("note") as string | null)?.trim();
+    const dueDateRaw = (formData.get("due_date") as string | null)?.trim();
+
+    if (!title) {
+      return;
+    }
+
+    const input: {
+      task_id: number;
+      title: string;
+      note?: string;
+      due_date?: string;
+    } = { task_id: taskId, title };
+
+    if (note) {
+      input.note = note;
+    }
+    if (dueDateRaw) {
+      input.due_date = dueDateRaw;
+    }
+
+    await createSubTaskMutation({
+      variables: { input },
+    });
+
+    form.reset();
+  };
+
+  const handleToggleSubTask = async (subTask: SubTask) => {
+    setTogglingSubTaskId(subTask.id);
+    try {
+      await toggleSubTaskMutation({
+        variables: {
+          id: subTask.id,
+          completed: subTask.completed === 0,
+        },
+      });
+    } finally {
+      setTogglingSubTaskId(null);
+    }
+  };
+
   return (
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">Todo List</h1>
@@ -263,13 +327,13 @@ export default function Home() {
             />
           </label>
         </div>
-        <label className="text-sm font-medium flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={incompleteOnly}
-            onChange={(event) => setIncompleteOnly(event.target.checked)}
-          />
-          未完了のみ表示
+          <label className="text-sm font-medium flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={incompleteOnly}
+              onChange={(event) => setIncompleteOnly(event.target.checked)}
+            />
+            未完了のみ表示
         </label>
         {categoriesError && (
           <p className="text-xs text-red-600">
@@ -347,6 +411,7 @@ export default function Home() {
               ? categoryNameMap.get(task.category_id)
               : undefined;
           const completedAtText = task.completed_at ?? "未設定";
+          const subTasks = task.sub_tasks ?? [];
 
           return (
             <li
@@ -469,6 +534,79 @@ export default function Home() {
                 >
                   {deletingId === task.id ? "削除中..." : "削除"}
                 </button>
+              </div>
+              <div className="mt-4 border-t pt-4">
+                <h4 className="text-sm font-semibold mb-2">サブタスク</h4>
+                {subTasks.length === 0 ? (
+                  <p className="text-xs text-gray-500 mb-2">サブタスクがありません。</p>
+                ) : (
+                  <ul className="space-y-2 mb-3">
+                    {subTasks.map((subTask) => {
+                      const subCompleted = Boolean(subTask.completed);
+                      return (
+                        <li
+                          key={subTask.id}
+                          className="border rounded px-3 py-2 flex items-center justify-between gap-4"
+                        >
+                          <div>
+                            <p className={`text-sm font-medium ${subCompleted ? "line-through text-gray-500" : ""}`}>
+                              {subTask.title}
+                            </p>
+                            {subTask.note && (
+                              <p className="text-xs text-gray-600 whitespace-pre-line">
+                                {subTask.note}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500">
+                              期限: {subTask.due_date ?? "未設定"} / 完了:{' '}
+                              {subTask.completed_at ?? "未完了"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="text-xs bg-indigo-500 text-white px-2 py-1 rounded disabled:opacity-60"
+                            onClick={() => handleToggleSubTask(subTask)}
+                            disabled={togglingSubTaskId === subTask.id}
+                          >
+                            {togglingSubTaskId === subTask.id
+                              ? "更新中..."
+                              : subCompleted
+                                ? "未完了に戻す"
+                                : "完了にする"}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <form
+                  onSubmit={(event) => handleCreateSubTask(event, task.id)}
+                  className="flex flex-wrap gap-2"
+                >
+                  <input
+                    name="title"
+                    type="text"
+                    placeholder="サブタスク名"
+                    className="border rounded px-2 py-1 flex-1 min-w-[160px]"
+                    required
+                  />
+                  <input
+                    name="due_date"
+                    type="date"
+                    className="border rounded px-2 py-1"
+                  />
+                  <textarea
+                    name="note"
+                    placeholder="メモ"
+                    className="border rounded px-2 py-1 flex-1 min-w-[160px]"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                  >
+                    サブタスク追加
+                  </button>
+                </form>
               </div>
             </li>
           );

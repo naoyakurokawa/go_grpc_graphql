@@ -13,6 +13,7 @@ type Task struct {
 	CategoryID  uint64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	SubTasks    []SubTask
 }
 
 type UpdateTaskRequest struct {

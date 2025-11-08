@@ -14,7 +14,9 @@ import (
 func RegisterService(grpcServer *grpc.Server, db *gorm.DB) {
 	taskRepo := store.NewTaskRepository(db)
 	taskUsecase := usecase.NewTaskUseCase(taskRepo)
-	taskController := NewTaskController(taskUsecase)
+	subTaskRepo := store.NewSubTaskRepository(db)
+	subTaskUsecase := usecase.NewSubTaskUseCase(subTaskRepo)
+	taskController := NewTaskController(taskUsecase, subTaskUsecase)
 	pb.RegisterTaskServiceServer(grpcServer, taskController)
 
 	categoryRepo := store.NewCategoryRepository(db)

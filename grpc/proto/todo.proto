@@ -16,6 +16,7 @@ message Task {
   uint64 category_id = 7;
   google.protobuf.Timestamp due_date = 8;
   google.protobuf.Timestamp completed_at = 9;
+  repeated SubTask sub_tasks = 10;
 }
 
 message NewTask {
@@ -37,6 +38,34 @@ message UpdateTask {
 
 message TaskList {
   repeated Task tasks = 1;
+}
+
+message SubTask {
+  uint64 id = 1;
+  uint64 task_id = 2;
+  string title = 3;
+  string note = 4;
+  int32 completed = 5;
+  google.protobuf.Timestamp completed_at = 6;
+  google.protobuf.Timestamp due_date = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message NewSubTask {
+  uint64 task_id = 1;
+  string title = 2;
+  string note = 3;
+  google.protobuf.Timestamp due_date = 4;
+}
+
+message ToggleSubTaskRequest {
+  uint64 id = 1;
+  bool completed = 2;
+}
+
+message SubTaskList {
+  repeated SubTask sub_tasks = 1;
 }
 
 message TaskId {
@@ -62,9 +91,16 @@ message DeleteTaskResponse {
   bool success = 1;
 }
 
+message CreateSubTaskRequest {
+  NewSubTask input = 1;
+}
+
 service TaskService {
   rpc GetTasks (GetTasksRequest) returns (TaskList);
   rpc CreateTask (CreateTaskRequest) returns (Task);
   rpc UpdateTask (UpdateTaskRequest) returns (Task);
   rpc DeleteTask (TaskId) returns (DeleteTaskResponse);
+  rpc CreateSubTask (CreateSubTaskRequest) returns (SubTask);
+  rpc ToggleSubTask (ToggleSubTaskRequest) returns (SubTask);
+  rpc ListSubTasks (TaskId) returns (SubTaskList);
 }

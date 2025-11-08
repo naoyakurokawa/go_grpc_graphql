@@ -11,6 +11,19 @@ export type Task = {
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
+  sub_tasks: SubTask[];
+};
+
+export type SubTask = {
+  id: number;
+  task_id: number;
+  title: string;
+  note: string | null;
+  completed: number;
+  completed_at?: string | null;
+  due_date?: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Category = {
@@ -44,6 +57,17 @@ export const GET_TASKS = gql`
       completed_at
       created_at
       updated_at
+      sub_tasks {
+        id
+        task_id
+        title
+        note
+        completed
+        completed_at
+        due_date
+        created_at
+        updated_at
+      }
     }
   }
 `;
@@ -84,6 +108,17 @@ export const CREATE_TASK = gql`
       completed_at
       created_at
       updated_at
+      sub_tasks {
+        id
+        task_id
+        title
+        note
+        completed
+        completed_at
+        due_date
+        created_at
+        updated_at
+      }
     }
   }
 `;
@@ -126,6 +161,17 @@ export const UPDATE_TASK = gql`
       completed_at
       created_at
       updated_at
+      sub_tasks {
+        id
+        task_id
+        title
+        note
+        completed
+        completed_at
+        due_date
+        created_at
+        updated_at
+      }
     }
   }
 `;
@@ -162,6 +208,40 @@ export const GET_CATEGORIES = gql`
     categories {
       id
       name
+    }
+  }
+`;
+
+export type CreateSubTaskInput = {
+  task_id: number;
+  title: string;
+  note?: string;
+  due_date?: string | null;
+};
+
+export const CREATE_SUB_TASK = gql`
+  mutation CreateSubTask($input: NewSubTask!) {
+    createSubTask(input: $input) {
+      id
+      task_id
+      title
+      note
+      completed
+      completed_at
+      due_date
+      created_at
+      updated_at
+    }
+  }
+`;
+
+export const TOGGLE_SUB_TASK = gql`
+  mutation ToggleSubTask($id: Uint64!, $completed: Boolean!) {
+    toggleSubTask(id: $id, completed: $completed) {
+      id
+      completed
+      completed_at
+      updated_at
     }
   }
 `;
