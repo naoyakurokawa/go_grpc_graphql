@@ -14,6 +14,7 @@ type Task struct {
 	CompletedAt *time.Time `gorm:"column:completed_at;type:datetime"`
 	DueDate     *time.Time `gorm:"column:due_date;type:date"`
 	CategoryID  uint64     `gorm:"column:category_id;type:bigint unsigned"`
+	UserID      uint64     `gorm:"column:user_id;type:bigint unsigned"`
 	CreatedAt   time.Time  `gorm:"column:created_at;autoCreateTime"` // 自動で現在時刻が設定される
 	UpdatedAt   time.Time  `gorm:"column:updated_at;autoUpdateTime"` // 更新時に自動更新される
 }
@@ -33,6 +34,7 @@ func (t Task) ToModel() model.Task {
 		CompletedAt: t.CompletedAt,
 		DueDate:     t.DueDate,
 		CategoryID:  t.CategoryID,
+		UserID:      t.UserID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
 	}
@@ -48,6 +50,7 @@ func FromModel(task model.Task) Task {
 		CompletedAt: task.CompletedAt,
 		DueDate:     task.DueDate,
 		CategoryID:  task.CategoryID,
+		UserID:      task.UserID,
 		CreatedAt:   task.CreatedAt,
 		UpdatedAt:   task.UpdatedAt,
 	}

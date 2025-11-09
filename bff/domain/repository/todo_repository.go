@@ -21,5 +21,6 @@ type TaskFilter struct {
 	CategoryID     *uint64
 	DueDateStart   *string
 	DueDateEnd     *string
-	IncompleteOnly bool
+	IncompleteOnly *bool
+	UserID         *uint64
 }

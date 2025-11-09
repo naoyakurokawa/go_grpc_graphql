@@ -212,6 +212,40 @@ export const GET_CATEGORIES = gql`
   }
 `;
 
+export type User = {
+  id: number;
+  email: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GetMeQuery = {
+  me: User | null;
+};
+
+export const GET_ME = gql`
+  query Me {
+    me {
+      id
+      email
+      created_at
+      updated_at
+    }
+  }
+`;
+
+export const LOGIN = gql`
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password)
+  }
+`;
+
+export const LOGOUT = gql`
+  mutation Logout {
+    logout
+  }
+`;
+
 export type CreateSubTaskInput = {
   task_id: number;
   title: string;
