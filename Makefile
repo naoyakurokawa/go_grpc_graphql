@@ -19,7 +19,7 @@ PROTO_INCLUDE_PATHS := --proto_path=. $(if $(PROTO_FILES_FROM_DIR),--proto_path=
 # ========= PHONY =========
 .PHONY: \
   goose-up goose-status goose-down \
-  backend-mock-category backend-test \
+  backend-mock-category backend-mock backend-test backend-go-test \
   gqlgen proto _require_proto_files \
   docker-shell grpc-shell \
   up down restart logs
@@ -51,11 +51,23 @@ gqlgen:
 	docker compose run --rm bff sh -c 'gqlgen generate'
 
 # ========= backend helpers =========
-backend-mock-category:
-	docker compose run --rm $(BACKEND_SERVICE) sh -c 'cd $(BACKEND_WORKDIR) && go run github.com/golang/mock/mockgen@v1.6.0 -destination=domain/repository/mock/category_repository_mock.go -package=mock backend/domain/repository CategoryRepository'
+backend-mock:
+	cd backend && set -e; \
+		go run github.com/golang/mock/mockgen@v1.6.0 -destination=domain/repository/mock/category_repository_mock.go -package=mock backend/domain/repository CategoryRepository; \
+		go run github.com/golang/mock/mockgen@v1.6.0 -destination=domain/repository/mock/task_repository_mock.go -package=mock backend/domain/repository TaskRepository; \
+		go run github.com/golang/mock/mockgen@v1.6.0 -destination=domain/repository/mock/subtask_repository_mock.go -package=mock backend/domain/repository SubTaskRepository; \
+		go run github.com/golang/mock/mockgen@v1.6.0 -destination=domain/repository/mock/user_repository_mock.go -package=mock backend/domain/repository UserRepository
+
+backend-mock-category: backend-mock
+	@echo "Generated repository mocks."
 
 backend-test:
 	docker compose run --rm $(BACKEND_SERVICE) sh -c 'cd $(BACKEND_WORKDIR) && go test ./...'
+
+backend-go-test:
+	cd backend && tmp_dir=$$(mktemp -d); \
+		GOCACHE=$$tmp_dir go test ./...; \
+		rm -rf $$tmp_dir
 
 # ========= protobuf =========
 proto: _require_proto_files
