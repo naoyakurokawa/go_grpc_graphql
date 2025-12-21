@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"backend/domain/model"
-	"backend/domain/repository"
 	"backend/usecase"
 
 	pb "backend/pkg/pb"
@@ -36,15 +35,9 @@ func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (
 	if err != nil {
 		return nil, err
 	}
-	filter := repository.TaskFilter{}
-	if in != nil {
-		filter.CategoryID = in.CategoryId
-		filter.DueDateFrom = timestampToTime(in.DueDateStart)
-		filter.DueDateTo = timestampToTime(in.DueDateEnd)
-		filter.IncompleteOnly = in.IncompleteOnly
-	}
-	filter.UserID = &userID
-	tasks, err := h.usecase.ListTasks(ctx, filter)
+	req := toGetTasksRequest(in)
+	req.UserID = &userID
+	tasks, err := h.usecase.ListTasks(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +137,23 @@ func (h *TaskController) ListSubTasks(ctx context.Context, in *pb.TaskId) (*pb.S
 	}
 
 	return &pb.SubTaskList{SubTasks: pbSubTasks}, nil
+}
+
+func toGetTasksRequest(in *pb.GetTasksRequest) model.GetTasksRequest {
+	req := model.GetTasksRequest{}
+	if in.CategoryId != nil {
+		req.CategoryID = in.CategoryId
+	}
+	if in.DueDateStart != nil {
+		req.DueDateFrom = timestampToTime(in.DueDateStart)
+	}
+	if in.DueDateEnd != nil {
+		req.DueDateTo = timestampToTime(in.DueDateEnd)
+	}
+	if in.IncompleteOnly != nil {
+		req.IncompleteOnly = in.IncompleteOnly
+	}
+	return req
 }
 
 func toModelTaskFromCreateTaskRequest(in *pb.CreateTaskRequest) model.Task {

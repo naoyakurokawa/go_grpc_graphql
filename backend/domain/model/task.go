@@ -14,7 +14,16 @@ type Task struct {
 	UserID      uint64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	DeletedAt   *time.Time
 	SubTasks    []SubTask
+}
+
+type GetTasksRequest struct {
+	CategoryID     *uint64
+	DueDateFrom    *time.Time
+	DueDateTo      *time.Time
+	IncompleteOnly *bool
+	UserID         *uint64
 }
 
 type UpdateTaskRequest struct {
