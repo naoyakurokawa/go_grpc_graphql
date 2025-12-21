@@ -2,13 +2,16 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
+	"github.com/naoyakurokawa/go_grpc_graphql/middleware/session"
 	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,6 +28,10 @@ func NewTodoStore(client pb.TaskServiceClient) repository.TodoRepository {
 }
 
 func (s *TodoStore) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
 	req := &pb.CreateTaskRequest{
 		Input: &pb.NewTask{
 			Title:      input.Title,
@@ -41,7 +48,7 @@ func (s *TodoStore) CreateTask(ctx context.Context, input model.NewTask) (*model
 		req.Input.DueDate = ts
 	}
 
-	res, err := s.client.CreateTask(ctx, req)
+	res, err := s.client.CreateTask(ctxWithUser, req)
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +57,10 @@ func (s *TodoStore) CreateTask(ctx context.Context, input model.NewTask) (*model
 }
 
 func (s *TodoStore) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
 	req := &pb.UpdateTaskRequest{
 		Input: &pb.UpdateTask{
 			Id: input.ID,
@@ -77,7 +88,7 @@ func (s *TodoStore) UpdateTask(ctx context.Context, input model.UpdateTask) (*mo
 		req.Input.DueDate = ts
 	}
 
-	res, err := s.client.UpdateTask(ctx, req)
+	res, err := s.client.UpdateTask(ctxWithUser, req)
 	if err != nil {
 		return nil, err
 	}
@@ -86,9 +97,13 @@ func (s *TodoStore) UpdateTask(ctx context.Context, input model.UpdateTask) (*mo
 }
 
 func (s *TodoStore) DeleteTask(ctx context.Context, id uint64) (bool, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return false, err
+	}
 	req := &pb.TaskId{Id: id}
 
-	res, err := s.client.DeleteTask(ctx, req)
+	res, err := s.client.DeleteTask(ctxWithUser, req)
 	if err != nil {
 		return false, err
 	}
@@ -97,6 +112,10 @@ func (s *TodoStore) DeleteTask(ctx context.Context, id uint64) (bool, error) {
 }
 
 func (s *TodoStore) ListTasks(ctx context.Context, filter repository.TaskFilter) ([]*model.Task, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
 	req := &pb.GetTasksRequest{}
 	if filter.CategoryID != nil {
 		req.CategoryId = filter.CategoryID
@@ -115,11 +134,11 @@ func (s *TodoStore) ListTasks(ctx context.Context, filter repository.TaskFilter)
 		}
 		req.DueDateEnd = ts
 	}
-	if filter.IncompleteOnly {
-		req.IncompleteOnly = &filter.IncompleteOnly
+	if filter.IncompleteOnly != nil {
+		req.IncompleteOnly = filter.IncompleteOnly
 	}
 
-	res, err := s.client.GetTasks(ctx, req)
+	res, err := s.client.GetTasks(ctxWithUser, req)
 	if err != nil {
 		return nil, err
 	}
@@ -157,11 +176,20 @@ func toDomainTask(task *pb.Task) *model.Task {
 }
 
 func (s *TodoStore) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	note := ""
+	if input.Note != nil {
+		note = *input.Note
+	}
 	req := &pb.CreateSubTaskRequest{
 		Input: &pb.NewSubTask{
 			TaskId: input.TaskID,
 			Title:  input.Title,
-			Note:   input.Note,
+			Note:   note,
 		},
 	}
 
@@ -173,7 +201,7 @@ func (s *TodoStore) CreateSubTask(ctx context.Context, input model.NewSubTask) (
 		req.Input.DueDate = ts
 	}
 
-	res, err := s.client.CreateSubTask(ctx, req)
+	res, err := s.client.CreateSubTask(ctxWithUser, req)
 	if err != nil {
 		return nil, err
 	}
@@ -182,12 +210,16 @@ func (s *TodoStore) CreateSubTask(ctx context.Context, input model.NewSubTask) (
 }
 
 func (s *TodoStore) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	ctxWithUser, err := withUserMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
 	req := &pb.ToggleSubTaskRequest{
 		Id:        id,
 		Completed: completed,
 	}
 
-	res, err := s.client.ToggleSubTask(ctx, req)
+	res, err := s.client.ToggleSubTask(ctxWithUser, req)
 	if err != nil {
 		return nil, err
 	}
@@ -265,4 +297,13 @@ func toDomainSubTask(sub *pb.SubTask) *model.SubTask {
 		CreatedAt:   formatTimestamp(sub.GetCreatedAt()),
 		UpdatedAt:   formatTimestamp(sub.GetUpdatedAt()),
 	}
+}
+
+func withUserMetadata(ctx context.Context) (context.Context, error) {
+	userID, ok := session.UserIDFromContext(ctx)
+	if !ok {
+		return nil, errors.New("unauthenticated")
+	}
+	md := metadata.Pairs("x-user-id", fmt.Sprintf("%d", userID))
+	return metadata.NewOutgoingContext(ctx, md), nil
 }

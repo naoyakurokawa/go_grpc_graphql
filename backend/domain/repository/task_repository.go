@@ -20,4 +20,5 @@ type TaskFilter struct {
 	DueDateFrom    *time.Time
 	DueDateTo      *time.Time
 	IncompleteOnly *bool
+	UserID         *uint64
 }

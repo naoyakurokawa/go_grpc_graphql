@@ -7,6 +7,7 @@ type Query {
     due_date_end: String
     incomplete_only: Boolean
   ): [Task!]!
+  me: User
 }
 
 type Task {
@@ -40,6 +41,8 @@ type Mutation {
   deleteTask(id: Uint64!): Boolean!
   createSubTask(input: NewSubTask!): SubTask!
   toggleSubTask(id: Uint64!, completed: Boolean!): SubTask!
+  login(email: String!, password: String!): Boolean!
+  logout: Boolean!
 }
 
 input NewTask {
@@ -61,6 +64,13 @@ input UpdateTask {
 input NewSubTask {
   task_id: Uint64!
   title: String!
-  note: String!
+  note: String
   due_date: String
+}
+
+type User {
+  id: Uint64!
+  email: String!
+  created_at: String!
+  updated_at: String!
 }

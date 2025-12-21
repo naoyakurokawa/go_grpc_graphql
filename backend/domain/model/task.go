@@ -11,6 +11,7 @@ type Task struct {
 	CompletedAt *time.Time
 	DueDate     *time.Time
 	CategoryID  uint64
+	UserID      uint64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	SubTasks    []SubTask
@@ -24,4 +25,5 @@ type UpdateTaskRequest struct {
 	CompletedAt *time.Time
 	CategoryID  *uint64
 	DueDate     *time.Time
+	UserID      *uint64
 }

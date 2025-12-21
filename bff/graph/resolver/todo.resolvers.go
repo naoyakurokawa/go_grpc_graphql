@@ -6,35 +6,52 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
+	"github.com/naoyakurokawa/go_grpc_graphql/middleware/session"
 )
 
 // CreateTask is the resolver for the createTask field.
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
+	if _, err := requireUserID(ctx); err != nil {
+		return nil, err
+	}
 	return r.TodoController.CreateTask(ctx, input)
 }
 
 // CreateSubTask is the resolver for the createSubTask field.
 func (r *mutationResolver) CreateSubTask(ctx context.Context, input model.NewSubTask) (*model.SubTask, error) {
+	if _, err := requireUserID(ctx); err != nil {
+		return nil, err
+	}
 	return r.TodoController.CreateSubTask(ctx, input)
 }
 
 // UpdateTask is the resolver for the updateTask field.
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
+	if _, err := requireUserID(ctx); err != nil {
+		return nil, err
+	}
 	return r.TodoController.UpdateTask(ctx, input)
 }
 
 // DeleteTask is the resolver for the deleteTask field.
 func (r *mutationResolver) DeleteTask(ctx context.Context, id uint64) (bool, error) {
+	if _, err := requireUserID(ctx); err != nil {
+		return false, err
+	}
 	return r.TodoController.DeleteTask(ctx, id)
 }
 
 // ToggleSubTask is the resolver for the toggleSubTask field.
 func (r *mutationResolver) ToggleSubTask(ctx context.Context, id uint64, completed bool) (*model.SubTask, error) {
+	if _, err := requireUserID(ctx); err != nil {
+		return nil, err
+	}
 	return r.TodoController.ToggleSubTask(ctx, id, completed)
 }
 
@@ -44,8 +61,13 @@ func (r *queryResolver) Tasks(ctx context.Context, categoryID *uint64, dueDateSt
 		CategoryID:     categoryID,
 		DueDateStart:   normalizeDateArg(dueDateStart),
 		DueDateEnd:     normalizeDateArg(dueDateEnd),
-		IncompleteOnly: incompleteOnly != nil && *incompleteOnly,
+		IncompleteOnly: incompleteOnly,
 	}
+	userID, err := requireUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	filter.UserID = &userID
 	return r.TodoController.ListTasks(ctx, filter)
 }
 
@@ -67,4 +89,12 @@ func normalizeDateArg(value *string) *string {
 		return nil
 	}
 	return &trimmed
+}
+
+func requireUserID(ctx context.Context) (uint64, error) {
+	userID, ok := session.UserIDFromContext(ctx)
+	if !ok {
+		return 0, errors.New("unauthenticated")
+	}
+	return userID, nil
 }

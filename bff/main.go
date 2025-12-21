@@ -11,6 +11,7 @@ import (
 	"github.com/naoyakurokawa/go_grpc_graphql/controller"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph"
 	"github.com/naoyakurokawa/go_grpc_graphql/graph/resolver"
+	"github.com/naoyakurokawa/go_grpc_graphql/middleware/session"
 	"github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
 	"github.com/naoyakurokawa/go_grpc_graphql/usecase"
 	"google.golang.org/grpc"
@@ -33,16 +34,21 @@ func main() {
 	// gRPC クライアントを作成
 	taskClient := pb.NewTaskServiceClient(conn)
 	categoryClient := pb.NewCategoryServiceClient(conn)
+	authClient := pb.NewAuthServiceClient(conn)
 
 	todoRepo := store.NewTodoStore(taskClient)
 	categoryRepo := store.NewCategoryStore(categoryClient)
+	authRepo := store.NewAuthStore(authClient)
 
 	todoUsecase := usecase.NewTodoUsecase(todoRepo)
 	todoController := controller.NewTodoController(todoUsecase)
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
 	categoryController := controller.NewCategoryController(categoryUsecase)
+	authUsecase := usecase.NewAuthUsecase(authRepo)
+	authController := controller.NewAuthController(authUsecase)
 
 	e := echo.New()
+	sessionManager := session.NewManager()
 
 	e.Debug = true
 	e.Use(middleware.Logger())
@@ -59,13 +65,17 @@ func main() {
 			echo.HeaderAccept,
 			echo.HeaderAuthorization,
 		},
+		AllowCredentials: true,
 	}))
+	e.Use(session.Middleware(sessionManager))
 
 	graphqlHandler := handler.NewDefaultServer(
 		graph.NewExecutableSchema(
 			graph.Config{Resolvers: &resolver.Resolver{
 				TodoController:     todoController,
 				CategoryController: categoryController,
+				AuthController:     authController,
+				SessionManager:     sessionManager,
 			}},
 		),
 	)

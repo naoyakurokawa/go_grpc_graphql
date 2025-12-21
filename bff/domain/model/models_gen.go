@@ -13,7 +13,7 @@ type Mutation struct {
 type NewSubTask struct {
 	TaskID  uint64  `json:"task_id"`
 	Title   string  `json:"title"`
-	Note    string  `json:"note"`
+	Note    *string `json:"note,omitempty"`
 	DueDate *string `json:"due_date,omitempty"`
 }
 
@@ -59,4 +59,11 @@ type UpdateTask struct {
 	CategoryID *uint64 `json:"category_id,omitempty"`
 	DueDate    *string `json:"due_date,omitempty"`
 	Completed  *int32  `json:"completed,omitempty"`
+}
+
+type User struct {
+	ID        uint64 `json:"id"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }

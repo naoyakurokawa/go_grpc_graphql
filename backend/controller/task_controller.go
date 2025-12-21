@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"backend/domain/model"
@@ -11,6 +12,9 @@ import (
 	pb "backend/pkg/pb"
 
 	"github.com/labstack/gommon/log"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -28,6 +32,10 @@ func NewTaskController(uc usecase.TaskUseCase, sub usecase.SubTaskUseCase) *Task
 
 // GetTasks handles retrieval of all tasks with optional filtering.
 func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (*pb.TaskList, error) {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	filter := repository.TaskFilter{}
 	if in != nil {
 		filter.CategoryID = in.CategoryId
@@ -35,6 +43,7 @@ func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (
 		filter.DueDateTo = timestampToTime(in.DueDateEnd)
 		filter.IncompleteOnly = in.IncompleteOnly
 	}
+	filter.UserID = &userID
 	tasks, err := h.usecase.ListTasks(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -61,7 +70,12 @@ func (h *TaskController) GetTasks(ctx context.Context, in *pb.GetTasksRequest) (
 
 // CreateTask handles creation of a task.
 func (h *TaskController) CreateTask(ctx context.Context, in *pb.CreateTaskRequest) (*pb.Task, error) {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	task := toModelTaskFromCreateTaskRequest(in)
+	task.UserID = userID
 	res, err := h.usecase.CreateTask(ctx, task)
 	if err != nil {
 		return nil, err
@@ -72,6 +86,9 @@ func (h *TaskController) CreateTask(ctx context.Context, in *pb.CreateTaskReques
 
 // UpdateTask handles updates to a task.
 func (h *TaskController) UpdateTask(ctx context.Context, in *pb.UpdateTaskRequest) (*pb.Task, error) {
+	if _, err := userIDFromContext(ctx); err != nil {
+		return nil, err
+	}
 	task, err := h.usecase.UpdateTask(ctx, toUpdateTaskRequest(in))
 	if err != nil {
 		return nil, err
@@ -82,6 +99,9 @@ func (h *TaskController) UpdateTask(ctx context.Context, in *pb.UpdateTaskReques
 
 // DeleteTask handles deleting a task.
 func (h *TaskController) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.DeleteTaskResponse, error) {
+	if _, err := userIDFromContext(ctx); err != nil {
+		return &pb.DeleteTaskResponse{Success: false}, err
+	}
 	if err := h.usecase.DeleteTask(ctx, in.Id); err != nil {
 		return &pb.DeleteTaskResponse{Success: false}, err
 	}
@@ -91,6 +111,9 @@ func (h *TaskController) DeleteTask(ctx context.Context, in *pb.TaskId) (*pb.Del
 
 // CreateSubTask handles creation of a sub task.
 func (h *TaskController) CreateSubTask(ctx context.Context, in *pb.CreateSubTaskRequest) (*pb.SubTask, error) {
+	if _, err := userIDFromContext(ctx); err != nil {
+		return nil, err
+	}
 	subTask := toModelSubTaskFromCreateRequest(in)
 	res, err := h.subTaskUsecase.Create(ctx, subTask)
 	if err != nil {
@@ -215,4 +238,20 @@ func toPBSubTask(sub model.SubTask) *pb.SubTask {
 		CreatedAt:   timestamppb.New(sub.CreatedAt),
 		UpdatedAt:   timestamppb.New(sub.UpdatedAt),
 	}
+}
+
+func userIDFromContext(ctx context.Context) (uint64, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return 0, status.Error(codes.Unauthenticated, "missing metadata")
+	}
+	values := md.Get("x-user-id")
+	if len(values) == 0 {
+		return 0, status.Error(codes.Unauthenticated, "missing user id")
+	}
+	id, err := strconv.ParseUint(values[0], 10, 64)
+	if err != nil {
+		return 0, status.Error(codes.Unauthenticated, "invalid user id")
+	}
+	return id, nil
 }

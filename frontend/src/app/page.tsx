@@ -7,12 +7,16 @@ import {
   CREATE_TASK,
   DELETE_TASK,
   GET_CATEGORIES,
+  GET_ME,
   GET_TASKS,
+  LOGIN,
+  LOGOUT,
   TOGGLE_SUB_TASK,
   UPDATE_TASK,
   Category,
   SubTask,
   Task,
+  User,
 } from "../lib/getTodos";
 
 type GetTasksResponse = {
@@ -28,6 +32,16 @@ export default function Home() {
   const [dueDateStartFilter, setDueDateStartFilter] = useState<string>("");
   const [dueDateEndFilter, setDueDateEndFilter] = useState<string>("");
   const [incompleteOnly, setIncompleteOnly] = useState<boolean>(false);
+  const {
+    data: meData,
+    loading: meLoading,
+    error: meError,
+    refetch: refetchMe,
+  } = useQuery(GET_ME, { fetchPolicy: "cache-and-network" });
+  const me = meData?.me ?? null;
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const categoryFilterValue = selectedCategoryId
     ? Number(selectedCategoryId)
@@ -43,9 +57,16 @@ export default function Home() {
     [categoryFilterValue, dueDateStartFilter, dueDateEndFilter, incompleteOnly],
   );
 
-  const { data, loading, error } = useQuery<GetTasksResponse>(GET_TASKS, {
+  const shouldFetchTasks = Boolean(me);
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchTasks,
+  } = useQuery<GetTasksResponse>(GET_TASKS, {
     variables: taskVariables,
     fetchPolicy: "cache-and-network",
+    skip: !shouldFetchTasks,
   });
 
   const {
@@ -95,6 +116,8 @@ export default function Home() {
     refetchQueries: taskRefetchQueries,
     awaitRefetchQueries: true,
   });
+  const [loginMutation, { loading: loggingIn }] = useMutation(LOGIN);
+  const [logoutMutation, { loading: loggingOut }] = useMutation(LOGOUT);
 
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -234,7 +257,31 @@ export default function Home() {
     }
   };
 
-  const tasks = data?.tasks ?? [];
+  const tasks = shouldFetchTasks ? data?.tasks ?? [] : [];
+
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoginError(null);
+    try {
+      await loginMutation({
+        variables: { email: loginEmail.trim(), password: loginPassword },
+      });
+      setLoginEmail("");
+      setLoginPassword("");
+      await refetchMe();
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : "ログインに失敗しました");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation();
+      await refetchMe();
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : "ログアウトに失敗しました");
+    }
+  };
 
   const handleCreateSubTask = async (
     event: FormEvent<HTMLFormElement>,
@@ -290,6 +337,68 @@ export default function Home() {
     <main className="p-6">
       <h1 className="text-2xl font-bold mb-4">Todo List</h1>
 
+      <section className="mb-6 border rounded p-4 bg-white shadow-sm">
+        {me ? (
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">ログイン中: {me.email}</p>
+              <p className="text-xs text-gray-500">ID: {me.id}</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded disabled:opacity-60"
+              disabled={loggingOut}
+            >
+              {loggingOut ? "ログアウト中..." : "ログアウト"}
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleLogin}
+            className="flex flex-col gap-2 sm:flex-row sm:items-end"
+          >
+            <label className="text-sm font-medium flex-1">
+              Email
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(event) => setLoginEmail(event.target.value)}
+                className="mt-1 border rounded px-3 py-2 w-full"
+                required
+              />
+            </label>
+            <label className="text-sm font-medium flex-1">
+              パスワード
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(event) => setLoginPassword(event.target.value)}
+                className="mt-1 border rounded px-3 py-2 w-full"
+                required
+              />
+            </label>
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-60"
+              disabled={loggingIn}
+            >
+              {loggingIn ? "ログイン中..." : "ログイン"}
+            </button>
+          </form>
+        )}
+        {loginError && (
+          <p className="text-sm text-red-600 mt-2">{loginError}</p>
+        )}
+        {meError && (
+          <p className="text-sm text-red-600 mt-2">
+            ユーザー情報の取得に失敗しました: {meError.message}
+          </p>
+        )}
+      </section>
+
+      {me ? (
+        <>
       <section className="mb-6 flex flex-col gap-2">
         <label className="text-sm font-medium">
           カテゴリで絞り込み
@@ -612,6 +721,14 @@ export default function Home() {
           );
         })}
       </ul>
+        </>
+      ) : (
+        !meLoading && (
+          <p className="text-sm text-gray-600">
+            ログインするとタスクを表示・管理できます。
+          </p>
+        )
+      )}
     </main>
   );
 }

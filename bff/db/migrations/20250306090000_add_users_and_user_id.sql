@@ -1,0 +1,21 @@
+-- +goose Up
+CREATE TABLE users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+ALTER TABLE tasks
+  ADD COLUMN user_id BIGINT UNSIGNED NULL AFTER completed_at,
+  ADD INDEX idx_tasks_user_id (user_id),
+  ADD CONSTRAINT fk_tasks_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- +goose Down
+ALTER TABLE tasks
+  DROP FOREIGN KEY fk_tasks_user_id,
+  DROP INDEX idx_tasks_user_id,
+  DROP COLUMN user_id;
+
+DROP TABLE users;

@@ -23,4 +23,9 @@ func RegisterService(grpcServer *grpc.Server, db *gorm.DB) {
 	categoryUsecase := usecase.NewCategoryUseCase(categoryRepo)
 	categoryController := NewCategoryController(categoryUsecase)
 	pb.RegisterCategoryServiceServer(grpcServer, categoryController)
+
+	userRepo := store.NewUserRepository(db)
+	authUsecase := usecase.NewAuthUseCase(userRepo)
+	authController := NewAuthController(authUsecase)
+	pb.RegisterAuthServiceServer(grpcServer, authController)
 }

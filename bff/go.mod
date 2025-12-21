@@ -4,6 +4,7 @@ go 1.24.6
 
 require (
 	github.com/99designs/gqlgen v0.17.81
+	github.com/google/uuid v1.6.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/vektah/gqlparser/v2 v2.5.31
 	google.golang.org/grpc v1.76.0
@@ -14,7 +15,6 @@ require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect

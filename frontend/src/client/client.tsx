@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 
 const getGraphQLEndpoint = () => {
   if (typeof window === "undefined") {
@@ -14,8 +14,13 @@ const getGraphQLEndpoint = () => {
   );
 };
 
-const client = new ApolloClient({
+const httpLink = createHttpLink({
   uri: getGraphQLEndpoint(),
+  credentials: "include",
+});
+
+const client = new ApolloClient({
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 
