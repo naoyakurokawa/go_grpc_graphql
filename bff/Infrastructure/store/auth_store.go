@@ -2,10 +2,12 @@ package store
 
 import (
 	"context"
+	"errors"
 
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/model"
 	"github.com/naoyakurokawa/go_grpc_graphql/domain/repository"
 	pb "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,7 +27,7 @@ func (s *AuthStore) Login(ctx context.Context, email, password string) (uint64, 
 		Password: password,
 	})
 	if err != nil {
-		return 0, err
+		return 0, normalizeError(err)
 	}
 
 	return res.GetUserId(), nil
@@ -34,7 +36,7 @@ func (s *AuthStore) Login(ctx context.Context, email, password string) (uint64, 
 func (s *AuthStore) GetUser(ctx context.Context, id uint64) (*model.User, error) {
 	user, err := s.client.GetUser(ctx, &pb.GetUserRequest{Id: id})
 	if err != nil {
-		return nil, err
+		return nil, normalizeError(err)
 	}
 
 	return &model.User{
@@ -50,4 +52,14 @@ func formatUserTimestamp(ts *timestamppb.Timestamp) string {
 		return ""
 	}
 	return ts.AsTime().Format("2006-01-02 15:04:05")
+}
+
+func normalizeError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if st, ok := status.FromError(err); ok {
+		return errors.New(st.Message())
+	}
+	return err
 }
