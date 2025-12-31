@@ -17,7 +17,7 @@ func UnaryValidateInterceptor(
 ) (interface{}, error) {
 	if v, ok := req.(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
 	return handler(ctx, req)
