@@ -6,6 +6,7 @@ import (
 
 	infrastructure "backend/Infrastructure"
 	"backend/controller"
+	"backend/interceptor"
 
 	"google.golang.org/grpc"
 )
@@ -22,7 +23,9 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.UnaryValidateInterceptor),
+	)
 	controller.RegisterService(grpcServer, db)
 
 	log.Println("Server is running on port 50051")

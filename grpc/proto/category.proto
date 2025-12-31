@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package task;
 
-option go_package = "/pb";
+option go_package = "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb;pb";
 
 import "google/protobuf/empty.proto";
 

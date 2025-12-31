@@ -4,10 +4,11 @@ go 1.24.6
 
 require (
 	github.com/99designs/gqlgen v0.17.81
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/vektah/gqlparser/v2 v2.5.31
-	google.golang.org/grpc v1.76.0
+	google.golang.org/grpc v1.71.0-dev
 	google.golang.org/protobuf v1.36.10
 )
 

@@ -2,9 +2,10 @@ syntax = "proto3";
 
 package task;
 
-option go_package = "/pb";
+option go_package = "github.com/naoyakurokawa/go_grpc_graphql/pkg/pb;pb";
 
 import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
 
 message Task {
   uint64 id = 1;
@@ -94,7 +95,7 @@ message TaskId {
 }
 
 message GetTasksRequest {
-  optional uint64 category_id = 1;
+  optional uint64 category_id = 1 [(validate.rules).uint64.lte = 20];
   optional google.protobuf.Timestamp due_date_start = 2;
   optional google.protobuf.Timestamp due_date_end = 3;
   optional bool incomplete_only = 4;
