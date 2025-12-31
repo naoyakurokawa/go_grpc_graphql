@@ -17,6 +17,7 @@ type Task struct {
 	UserID      uint64     `gorm:"column:user_id;type:bigint unsigned"`
 	CreatedAt   time.Time  `gorm:"column:created_at;autoCreateTime"` // 自動で現在時刻が設定される
 	UpdatedAt   time.Time  `gorm:"column:updated_at;autoUpdateTime"` // 更新時に自動更新される
+	DeletedAt   *time.Time `gorm:"column:deleted_at;type:timestamp"`
 }
 
 // TableName allows GORM to map the DTO to the tasks table.
@@ -37,6 +38,7 @@ func (t Task) ToModel() model.Task {
 		UserID:      t.UserID,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
+		DeletedAt:   t.DeletedAt,
 	}
 }
 
@@ -53,5 +55,6 @@ func FromModel(task model.Task) Task {
 		UserID:      task.UserID,
 		CreatedAt:   task.CreatedAt,
 		UpdatedAt:   task.UpdatedAt,
+		DeletedAt:   task.DeletedAt,
 	}
 }

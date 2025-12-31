@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 
+	"backend/Infrastructure/store/condition"
 	"backend/Infrastructure/store/dto"
 	"backend/domain/model"
 	"backend/domain/repository"
@@ -21,23 +22,8 @@ func NewTaskRepository(db *gorm.DB) repository.TaskRepository {
 }
 
 // FindAll retrieves every task, filtered by provided criteria.
-func (r *TaskRepository) FindAll(ctx context.Context, filter repository.TaskFilter) ([]model.Task, error) {
-	query := r.db
-	if filter.CategoryID != nil {
-		query = query.Where("category_id = ?", *filter.CategoryID)
-	}
-	if filter.DueDateFrom != nil {
-		query = query.Where("due_date >= ?", filter.DueDateFrom.Format("2006-01-02"))
-	}
-	if filter.DueDateTo != nil {
-		query = query.Where("due_date <= ?", filter.DueDateTo.Format("2006-01-02"))
-	}
-	if filter.IncompleteOnly != nil && *filter.IncompleteOnly {
-		query = query.Where("completed = ?", 0)
-	}
-	if filter.UserID != nil {
-		query = query.Where("user_id = ?", *filter.UserID)
-	}
+func (r *TaskRepository) FindAll(ctx context.Context, in model.GetTasksRequest) ([]model.Task, error) {
+	query := condition.ApplyTaskConditions(r.db, in)
 
 	var taskDTOs []dto.Task
 	if err := query.Find(&taskDTOs).Error; err != nil {
@@ -55,7 +41,7 @@ func (r *TaskRepository) FindAll(ctx context.Context, filter repository.TaskFilt
 // FindByID retrieves a task by its identifier.
 func (r *TaskRepository) FindByID(ctx context.Context, id uint64) (*model.Task, error) {
 	var task model.Task
-	if err := r.db.First(&task, "id = ?", id).Error; err != nil {
+	if err := r.db.First(&task, "id = ? AND deleted_at IS NULL", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -89,5 +75,5 @@ func (r *TaskRepository) Update(ctx context.Context, in model.Task) (*model.Task
 
 // Delete removes a task by id.
 func (r *TaskRepository) Delete(ctx context.Context, id uint64) error {
-	return r.db.Delete(&model.Task{}, "id = ?", id).Error
+	return r.db.Model(&dto.Task{}).Where("id = ?", id).Update("deleted_at", gorm.Expr("NOW()")).Error
 }

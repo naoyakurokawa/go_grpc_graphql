@@ -3,13 +3,14 @@ module backend
 go 1.24.0
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang/mock v1.6.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/gommon v0.4.2
 	golang.org/x/crypto v0.40.0
-	google.golang.org/grpc v1.76.0
+	google.golang.org/grpc v1.71.0-dev
 	google.golang.org/protobuf v1.36.10
 )
 

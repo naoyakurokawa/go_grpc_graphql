@@ -14,7 +14,7 @@ ROOT_PROTO_FILES := $(wildcard *.proto)
 PROTO_FILES_FROM_DIR := $(shell if [ -d $(PROTO_DIR) ]; then find $(PROTO_DIR) -name '*.proto'; fi)
 STRIPPED_PROTO_FILES := $(patsubst $(PROTO_DIR)/%,%,$(PROTO_FILES_FROM_DIR))
 PROTO_FILES      := $(strip $(ROOT_PROTO_FILES) $(STRIPPED_PROTO_FILES))
-PROTO_INCLUDE_PATHS := --proto_path=. $(if $(PROTO_FILES_FROM_DIR),--proto_path=$(PROTO_DIR))
+PROTO_INCLUDE_PATHS := --proto_path=. $(if $(PROTO_FILES_FROM_DIR),--proto_path=$(PROTO_DIR)) --proto_path=/usr/local/include
 
 # ========= PHONY =========
 .PHONY: \
@@ -81,6 +81,7 @@ proto: _require_proto_files
 		docker compose run --rm --build $(PROTO_SERVICE) protoc $(PROTO_INCLUDE_PATHS) \
 			--go_out=$$out_dir --go_opt=paths=source_relative \
 			--go-grpc_out=$$out_dir --go-grpc_opt=paths=source_relative \
+			--validate_out="lang=go,paths=source_relative:$$out_dir" \
 			$(PROTO_FILES); \
 	done
 
